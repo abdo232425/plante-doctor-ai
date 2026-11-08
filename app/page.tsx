@@ -20,12 +20,12 @@ export default function Home() {
           {photo && <img src={photo} style={{ width: "100%", borderRadius: 12, marginTop: 15 }} />}
         </div>
 
-        <button onClick={() => setResultat("Carence en eau - 87% : Arrosez 2 fois par semaine, lumière indirecte.")}
+        <button onClick={() => setResultat(« 🩺 DIAGNOSTIC: Carence en eau - 87% | 📋 CAUSE: Sol trop sec, manque d’arrosage | 💊 TRAITEMENT: Arrosez 2 fois par semaine, vaporisez les feuilles | ☀️ LUMIÈRE: Lumière indirecte, pas de soleil direct | 💧 ARROSAGE: 2 fois par semaine, vérifiez que la terre est humide | 🛡️ PRÉVENTION: Vérifiez la terre tous les 3 jours »)}
           style={{ width: "100%", background: "#16a34a", color: "white", border: "none", padding: 15, borderRadius: 12, marginTop: 15, fontSize: 16 }}>
           Analyser ma plante
         </button>
 
-        {resultat && <div style={{ background: "#dcfce7", padding: 15, borderRadius: 12, marginTop: 15 }}>🩺 {resultat}</div>}
+        {resultat && <div style={{ background: « #dcfce7 », padding: 15, borderRadius: 12, marginTop: 15, color: « #111 », whiteSpace: « pre-line » }}>{resultat.split(«  | « ).join(« \n\n »)}</div>}
 
         <h2 style={{ color: "#14532d" }}>💡 Conseils</h2>
         <p>💧 Arrosage : 2 fois par semaine</p>
