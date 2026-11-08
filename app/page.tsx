@@ -6,7 +6,7 @@ export default function Home() {
   const [resultat, setResultat] = useState("");
 
   return (
-    <main style={{ background: "#f0fdf4", minHeight: "100vh", padding: 20, fontFamily: "sans-serif" }}>
+    <main style={{ background: "#f0fdf4", minHeight: "100vh", padding: 20, fontFamily: "sans-serif", colorScheme: "light" }}>
       <div style={{ maxWidth: 600, margin: "auto", background: "white", borderRadius: 20, padding: 25 }}>
         <h1 style={{ textAlign: "center", color: "#14532d" }}>🌱 Plante Doctor AI</h1>
         <p style={{ textAlign: "center" }}>Des plantes en bonne santé, un avenir plus vert</p>
