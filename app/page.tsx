@@ -103,7 +103,7 @@ export default function Home() {
       Étape 3: Si tu n'es pas sûr, dis "Plante non identifiée" dans le nom.
       Retourne UNIQUEMENT ce JSON: {"name":"vrai nom en français","scientific":"vrai nom scientifique","health": nombre 0-100 selon ce que tu vois vraiment,"disease":"maladie visible vraiment en français","watering":"arrosage en français","light":"lumière en français","soil":"sol en français","treatment":"traitement en français"}`;
 
-    for (const model of ["gemini-2.5-flash", "gemini-2.0-flash"]) {
+    for (const model of ["gemini-3.8-flash"]) {
       try {
         const j = await callGemini(model, base64, prompt, key);
         if (j.error) { setErrMsg(`Gemini (${model}): ${j.error.message}`); continue; }
