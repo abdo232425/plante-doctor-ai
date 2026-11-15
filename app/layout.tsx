@@ -11,21 +11,16 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
-
-export const metadata: Metadata = {
+import "./globals.css";
+export const metadata = {
   title: "Plante Doctor AI - طبيب النباتات",
-  description: "صور نبتتك و خلي الذكاء الاصطناعي يشخصها ليك",
-  icons: { icon: "https://cdn-icons-png.flaticon.com/512/628/628324.png" },
+  description: "صور نبتتك و خلي Gemini يشخصها ليك",
+  icons: { icon: "data:image/svg+xml,[STRIPPED]" },
 };
-
-
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="fr" style={{ colorScheme: "light" }}>
+      <body style={{ background: "#E8F5E9", color: "#111", margin: 0 }}>{children}</body>
     </html>
   );
 }

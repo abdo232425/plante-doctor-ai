@@ -10,14 +10,15 @@ export default function Home() {
   const [showCam, setShowCam] = useState(false);
   const [showTeam, setShowTeam] = useState(false);
   const [confetti, setConfetti] = useState(false);
+  const [errMsg, setErrMsg] = useState("");
   const videoRef = useRef<any>(null);
   const streamRef = useRef<any>(null);
 
   const T = lang === "ar" ? {
     title: "طبيب النباتات", sub: "صور نبتتك و خلي Gemini الحقيقي يشخصها ليك",
     cam: "افتح الكاميرا", gal: "من المعرض", take: "التقط الصورة",
-    analyse: "حلل نبتتي بـ Gemini", analysing: "Gemini الحقيقي كيحلل نبتتك...",
-    aiBadge: "Gemini حقيقي", camBadge: "كاميرا مباشرة",
+    analyse: "حلل نبتتي بـ Gemini", analysing: "Gemini كيحلل بدقة...",
+    aiBadge: "Gemini دقيق", camBadge: "كاميرا مباشرة",
     health: "الصحة", disease: "المرض", watering: "السقي", light: "الضوء", soil: "التربة", treat: "العلاج", sci: "الاسم العلمي",
     capTitle: "شنو كيعرف يدير التطبيق؟", tipTitle: "نصيحة اليوم", tip: "ما تسقيش النبتة بزاف، خلي التربة تنشف شوية عاد سقيها، و حطها فبلاصة فيها الضو.",
     gardenTitle: "حديقتي", gardenSub: "تتبع النمو و السقي ديال نباتاتك",
@@ -25,7 +26,7 @@ export default function Home() {
     teamTitle: "فريق البحث", school: "ثانوية عبدالله بن ياسين - إنزكان، أيت ملول", made: "صُنع بحب في المغرب",
     members: "أعضاء الفريق - 4 أشخاص", close: "سد",
     navHome: "تشخيص", navGarden: "حديقتي",
-    caps: ["📸 تحليل أي نبتة من التصويرة بـ Gemini الحقيقي","🌱 يعطيك اسم النبتة الحقيقي و الاسم العلمي","🩺 تشخيص كامل للمرض و الصحة","💧 تتبع السقي و مراحل النمو","🌍 نصائح الضوء و التربة و العلاج","🇲🇦🇫🇷 عربية كاملة أو فرنسية كاملة"],
+    caps: ["📸 تحليل أي نبتة من التصويرة بـ Gemini الدقيق","🌱 يعطيك اسم النبتة الحقيقي و الاسم العلمي","🩺 تشخيص دقيق للمرض و الصحة","💧 تتبع السقي و مراحل النمو","🌍 نصائح الضوء و التربة و العلاج","🇲🇦🇫🇷 عربية كاملة أو فرنسية كاملة"],
     plants: [
       { name: "Coléus (Coleus)", img: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400", status: "À surveiller", statusAr: "راقبها", water: "Arrosage dans 4 j", waterAr: "السقي بعد 4 أيام", growth: 65, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" },
       { name: "Olivier", img: "https://images.unsplash.com/photo-1445264718234-a623be589d37?w=400", status: "À surveiller", statusAr: "راقبها", water: "Arrosage dans 4 j", waterAr: "السقي بعد 4 أيام", growth: 80, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" },
@@ -35,10 +36,10 @@ export default function Home() {
       { name: "Olivier", img: "https://images.unsplash.com/photo-1470058869958-2a77ade41c02?w=400", status: "À surveiller", statusAr: "راقبها", water: "Arrosage dans 2 j", waterAr: "السقي بعد يومين", growth: 90, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" },
     ]
   } : {
-    title: "Plante Doctor", sub: "Prends ta plante en photo, le vrai Gemini la diagnostique",
+    title: "Plante Doctor", sub: "Prends ta plante en photo, le vrai Gemini la diagnostique avec précision",
     cam: "Ouvrir Caméra", gal: "Galerie", take: "Prendre photo",
-    analyse: "Analyser avec Gemini", analysing: "Le vrai Gemini analyse ta plante...",
-    aiBadge: "Vrai Gemini", camBadge: "Caméra en direct",
+    analyse: "Analyser avec Gemini", analysing: "Gemini analyse avec précision...",
+    aiBadge: "Gemini précis", camBadge: "Caméra en direct",
     health: "Santé", disease: "Maladie", watering: "Arrosage", light: "Lumière", soil: "Sol", treat: "Traitement", sci: "Nom scientifique",
     capTitle: "Que peut faire l'application ?", tipTitle: "Conseil du jour", tip: "Ne pas trop arroser ta plante, laisse sécher la terre un peu avant de l'arroser, et mets-la à la lumière.",
     gardenTitle: "Mon jardin", gardenSub: "Suivi de la croissance et de l'arrosage de tes plantes",
@@ -46,7 +47,7 @@ export default function Home() {
     teamTitle: "Équipe de Recherche", school: "Lycée Abdellah Ben Yassine - Inezgane, Aït Melloul", made: "Fait avec amour au Maroc",
     members: "Membres - 4 personnes", close: "Fermer",
     navHome: "Diagnostic", navGarden: "Mon jardin",
-    caps: ["📸 Analyser n'importe quelle plante avec le vrai Gemini","🌱 Donner le vrai nom et le nom scientifique","🩺 Diagnostic complet de la maladie et de la santé","💧 Suivi de l'arrosage et des étapes de croissance","🌍 Conseils lumière, sol et traitement","🇲🇦🇫🇷 Tout en arabe ou tout en français"],
+    caps: ["📸 Analyser n'importe quelle plante avec Gemini précis","🌱 Donner le vrai nom et le nom scientifique","🩺 Diagnostic précis de la maladie et de la santé","💧 Suivi de l'arrosage et des étapes de croissance","🌍 Conseils lumière, sol et traitement","🇲🇦🇫🇷 Tout en arabe ou tout en français"],
     plants: [
       { name: "Coléus (Coleus)", img: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400", status: "À surveiller", statusAr: "راقبها", water: "Arrosage dans 4 j", waterAr: "السقي بعد 4 أيام", growth: 65, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" },
       { name: "Olivier", img: "https://images.unsplash.com/photo-1445264718234-a623be589d37?w=400", status: "À surveiller", statusAr: "راقبها", water: "Arrosage dans 4 j", waterAr: "السقي بعد 4 أيام", growth: 80, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" },
@@ -71,44 +72,69 @@ export default function Home() {
     const r = new FileReader(); r.onload = () => { setImg(r.result as string); setShowCam(false); }; r.readAsDataURL(f); e.target.value = "";
   };
 
-  const analyseGemini = async (image: string) => {
-    const key = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-    if (!key) return null;
-    try {
-      const base64 = image.split(",")[1];
-      const prompt = lang === "ar"
-        ? "أنت طبيب نباتات خبير. حلل هذه الصورة للنبتة و أعد JSON فقط: {\"name\":\"اسم النبتة بالعربية\",\"scientific\":\"الاسم العلمي\",\"health\": رقم من 0 إلى 100,\"disease\":\"المرض بالعربية\",\"watering\":\"السقي بالعربية\",\"light\":\"الضوء بالعربية\",\"soil\":\"التربة بالعربية\",\"treatment\":\"العلاج بالعربية مفصل\"} لا تعيد نفس الإجابة."
-        : "Tu es un docteur des plantes expert. Analyse cette photo et retourne UNIQUEMENT du JSON: {\"name\":\"nom en français\",\"scientific\":\"nom scientifique\",\"health\": nombre 0 à 100,\"disease\":\"maladie en français\",\"watering\":\"arrosage en français\",\"light\":\"lumière en français\",\"soil\":\"sol en français\",\"treatment\":\"traitement en français détaillé\"} Ne répète jamais la même réponse.";
-      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: "image/jpeg", data: base64 } }] }] })
-      });
-      const j = await r.json();
-      const txt = j.candidates?.[0]?.content?.parts?.[0]?.text || "";
-      const clean = txt.replace(/```json|```/g, "").trim();
-      return JSON.parse(clean);
-    } catch { return null; }
+  // ===== GEMINI - أدق نسخة - temperature 0 = ما كيخترعش =====
+  const callGemini = async (model: string, base64: string, prompt: string, key: string) => {
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: "image/jpeg", data: base64 } }] }],
+        generationConfig: { temperature: 0, topP: 0.1, topK: 1, maxOutputTokens: 800 }
+      })
+    });
+    return await r.json();
   };
 
-  
-   
-  
+  const analyseGemini = async (image: string) => {
+    const key = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    if (!key) {
+      setErrMsg(lang === "ar" ? "المفتاح ما كاينش في Vercel" : "Clé manquante dans Vercel");
+      return null;
+    }
+    const base64 = image.split(",")[1];
+    const prompt = lang === "ar"
+      ? `أنت طبيب نباتات خبير ودقيق جدا. مهمتك: انظر للصورة بعناية شديدة.
+      الخطوة 1: صف ما تراه فعلا: لون الأوراق، شكل الورقة، شكل الزهرة، الساق.
+      الخطوة 2: بناء على ما رأيته فقط، حدد اسم النبتة. لا تخمن. لا تقل مونستيرا أبدا إلا إذا رأيت أوراقا مثقوبة كبيرة فعلا.
+      الخطوة 3: إذا لم تكن متأكدا، قل "نبتة غير محددة" في الاسم.
+      أعد فقط JSON: {"name":"الاسم الحقيقي بالعربية","scientific":"الاسم العلمي","health": رقم 0-100 حسب ما تراه فعلا,"disease":"المرض الظاهر فعلا بالعربية","watering":"السقي بالعربية","light":"الضوء بالعربية","soil":"التربة بالعربية","treatment":"العلاج بالعربية"}`
+      : `Tu es un docteur des plantes expert et très précis. Ta mission: regarde la photo avec une extrême attention.
+      Étape 1: Décris ce que tu vois VRAIMENT: couleur des feuilles, forme de la feuille, forme de la fleur, tige.
+      Étape 2: D'après ce que tu as vu UNIQUEMENT, identifie la plante. Ne devine pas. Ne dis JAMAIS Monstera sauf si tu vois vraiment de grandes feuilles trouées.
+      Étape 3: Si tu n'es pas sûr, dis "Plante non identifiée" dans le nom.
+      Retourne UNIQUEMENT ce JSON: {"name":"vrai nom en français","scientific":"vrai nom scientifique","health": nombre 0-100 selon ce que tu vois vraiment,"disease":"maladie visible vraiment en français","watering":"arrosage en français","light":"lumière en français","soil":"sol en français","treatment":"traitement en français"}`;
+
+    for (const model of ["gemini-2.5-flash", "gemini-2.0-flash"]) {
+      try {
+        const j = await callGemini(model, base64, prompt, key);
+        if (j.error) { setErrMsg(`Gemini (${model}): ${j.error.message}`); continue; }
+        let txt = j.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        if (!txt) continue;
+        const start = txt.indexOf("{");
+        const end = txt.lastIndexOf("}") + 1;
+        if (start === -1 || end === 0) continue;
+        const parsed = JSON.parse(txt.slice(start, end));
+        if (!parsed.name) continue;
+        // تأكد الصحة رقم
+        if (typeof parsed.health !== "number") parsed.health = 75;
+        if (parsed.health < 0) parsed.health = 0;
+        if (parsed.health > 100) parsed.health = 100;
+        setErrMsg("");
+        return parsed;
+      } catch (e: any) { setErrMsg(`Erreur ${model}: ${e.message}`); continue; }
+    }
+    return null;
+  };
 
   const analyse = async () => {
-  if (!img) return;
-  setLoad(true); setRes(null); setConfetti(false);
-  const gemini = await analyseGemini(img);
-  if (!gemini) {
+    if (!img) return;
+    setLoad(true); setRes(null); setErrMsg(""); setConfetti(false);
+    const gemini = await analyseGemini(img);
+    if (gemini) { setRes(gemini); setConfetti(true); setTimeout(()=>setConfetti(false), 2000); }
     setLoad(false);
-    return;
-  }
-  setRes(gemini);
-  setConfetti(true); setTimeout(()=>setConfetti(false), 2000); setLoad(false);
-};
-  
+  };
 
   return (
-    <main style={{ maxWidth: 680, width: "100%", margin: "auto", padding: 16, paddingBottom: 110, fontFamily: "sans-serif", minHeight: "100vh", color: "#111", position: "relative", background: "#E8F5E9", overflow: "hidden" }}>
+    <main style={{ maxWidth: 680, width: "100%", margin: "auto", padding: 16, paddingBottom: 110, fontFamily: "sans-serif", minHeight: "100vh", color: "#111", position: "relative", background: "#E8F5E9", overflow: "hidden", colorScheme: "light" }}>
       <style>{`
         @keyframes float{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
         @keyframes shine{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
@@ -126,7 +152,6 @@ export default function Home() {
         .iBtn{animation:iMove 2s infinite !important}
       `}</style>
 
-      {/* نفس الخلفية فالصفحتين بجوج - أوراق كيطيحو */}
       <span className="falling" style={{ left: "5%", animationDuration: "7s" }}>🌿</span>
       <span className="falling" style={{ left: "18%", animationDuration: "9s", animationDelay: "1s" }}>🍃</span>
       <span className="falling" style={{ left: "32%", animationDuration: "8s", animationDelay: "2s" }}>🌱</span>
@@ -146,7 +171,6 @@ export default function Home() {
         <button onClick={() => setLang(lang==="ar"?"fr":"ar")} style={{ padding: "6px 10px", border: "none", background: "transparent", fontWeight: "bold", fontSize: 13, color: "#0F3D2E", cursor: "pointer" }}>{lang==="ar" ? "🇫🇷 Français" : "🇲🇦 العربية"}</button>
       </div>
 
-      {/* ============ الصفحة اللولة - Diagnostic ============ */}
       {page === "home" && <>
       <div className="shine" style={{ padding: 22, borderRadius: 22, textAlign: "center", marginTop: 10 }}>
         <div className="logo" style={{ fontSize: 62, background: "#fff", width: 92, height: 92, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "auto", boxShadow: "0 8px 20px rgba(0,0,0,0.25)" }}>🩺</div>
@@ -168,6 +192,7 @@ export default function Home() {
         </div>
         {showCam && <div style={{ marginTop: 12 }}><video ref={videoRef} autoPlay playsInline muted style={{ width: "100%", borderRadius: 14, background: "#000" }} /><button onClick={takePhoto} style={{ width: "100%", padding: 11, background: "#14532d", color: "#fff", border: 0, borderRadius: 10, marginTop: 8, fontWeight: "bold", fontSize: 13 }}>{T.take}</button></div>}
         {img && !showCam && <div style={{ marginTop: 12 }}><img src={img} style={{ width: "100%", borderRadius: 14, maxHeight: 340, objectFit: "cover" }} /><button onClick={analyse} style={{ width: "100%", padding: 13, background: "linear-gradient(90deg,#E86A33,#FF8A3D)", color: "#fff", border: 0, borderRadius: 12, marginTop: 8, fontWeight: "bold", fontSize: 14 }}>{load ? T.analysing : T.analyse}</button></div>}
+        {errMsg && <div style={{ background: "#FEE2E2", color: "#991B1B", padding: 12, borderRadius: 12, marginTop: 10, fontSize: 13, lineHeight: 1.5, border: "1px solid #FCA5A5" }}>⚠️ {errMsg}</div>}
       </div>
 
       {res && <div style={{ background: "#fff", padding: 16, borderRadius: 18, marginTop: 12, border: "2px solid #dcfce7" }}>
@@ -191,7 +216,6 @@ export default function Home() {
       </div>
       </>}
 
-      {/* ============ الصفحة التانية - Mon jardin - مزوقة كيما اللولة ============ */}
       {page === "garden" && <>
       <div className="shineGarden" style={{ padding: 22, borderRadius: 22, textAlign: "center", marginTop: 10 }}>
         <div className="logo" style={{ fontSize: 62, background: "#fff", width: 92, height: 92, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "auto", boxShadow: "0 8px 20px rgba(0,0,0,0.25)" }}>🌿</div>
@@ -227,7 +251,7 @@ export default function Home() {
       <p style={{ textAlign: "center", fontSize: 12, color: "#888", marginTop: 12 }}>{T.made}</p>
       </div>
 
-      <button onClick={() => setShowTeam(true)} className="iBtn" style={{ position: "fixed", bottom: 88, right: 16, zIndex: 90, width: 44, height: 44, borderRadius: "50%", background: "#fff", color: "#0F3D2E", border: "2px solid #FFD700", fontSize: 20, fontWeight: "bold", cursor: "pointer" }}>i</button>
+      <button onClick={() => setShowTeam(true)} className="iBtn" style={{ position: "fixed", bottom: 88, right: 16, zIndex: 90, width: 44, height: 44, minWidth: 44, minHeight: 44, borderRadius: "50%", background: "#ffffff", color: "#0F3D2E", border: "2px solid #FFD700", fontSize: 22, fontWeight: "900", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", lineHeight: "1", padding: 0, whiteSpace: "nowrap", overflow: "hidden", flexShrink: 0 }}>i</button>
 
       <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 80, background: "#fff", borderTop: "1px solid #eee", padding: "10px 12px", display: "flex", gap: 10, boxShadow: "0 -2px 12px rgba(0,0,0,0.08)" }}>
         <button onClick={() => setPage("home")} style={{ flex: 1, padding: 12, borderRadius: 14, border: "none", background: page === "home" ? "linear-gradient(135deg,#0F3D2E,#1a7a4a)" : "#F3F4F6", color: page === "home" ? "#fff" : "#0F3D2E", fontWeight: "bold", fontSize: 14, cursor: "pointer" }}>🩺 {T.navHome}</button>
