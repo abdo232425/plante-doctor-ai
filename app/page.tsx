@@ -79,7 +79,7 @@ export default function Home() {
       const prompt = lang === "ar"
         ? "أنت طبيب نباتات خبير. حلل هذه الصورة للنبتة و أعد JSON فقط: {\"name\":\"اسم النبتة بالعربية\",\"scientific\":\"الاسم العلمي\",\"health\": رقم من 0 إلى 100,\"disease\":\"المرض بالعربية\",\"watering\":\"السقي بالعربية\",\"light\":\"الضوء بالعربية\",\"soil\":\"التربة بالعربية\",\"treatment\":\"العلاج بالعربية مفصل\"} لا تعيد نفس الإجابة."
         : "Tu es un docteur des plantes expert. Analyse cette photo et retourne UNIQUEMENT du JSON: {\"name\":\"nom en français\",\"scientific\":\"nom scientifique\",\"health\": nombre 0 à 100,\"disease\":\"maladie en français\",\"watering\":\"arrosage en français\",\"light\":\"lumière en français\",\"soil\":\"sol en français\",\"treatment\":\"traitement en français détaillé\"} Ne répète jamais la même réponse.";
-      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: "image/jpeg", data: base64 } }] }] })
       });
@@ -90,7 +90,7 @@ export default function Home() {
     } catch { return null; }
   };
 
-  const localSmart = (image: string) => {
+  
     const c = document.createElement("canvas"); const im = new Image(); im.src = image;
     return new Promise<any>((resolve) => { im.onload = () => {
       c.width = 80; c.height = 80; const ctx = c.getContext("2d")!; ctx.drawImage(im, 0, 0, 80, 80);
@@ -100,16 +100,20 @@ export default function Home() {
       if (yellow/total*100 > 18) resolve(lang === "ar" ? { name: "نبتة بأوراق صفراء", scientific: "Chlorosis", health: 56, disease: "اصفرار الأوراق", watering: "مرة كل 3 أيام", light: "ضوء غير مباشر قوي", soil: "تربة غنية بالحديد", treatment: "نقص السقي + سماد حديد" } : { name: "Plante à feuilles jaunes", scientific: "Chlorosis", health: 56, disease: "Jaunissement", watering: "1 fois tous les 3 jours", light: "Lumière indirecte forte", soil: "Sol riche en fer", treatment: "Moins d'eau + engrais fer" });
       else resolve(lang === "ar" ? { name: "نبتة صحية - مونستيرا", scientific: "Monstera deliciosa", health: 92, disease: "سليمة", watering: "مرتين في الأسبوع", light: "ضوء غير مباشر", soil: "تربة جيدة", treatment: "حافظ على نفس العناية" } : { name: "Plante saine - Monstera", scientific: "Monstera deliciosa", health: 92, disease: "Saine", watering: "2 fois par semaine", light: "Lumière indirecte", soil: "Bon sol", treatment: "Garde les mêmes soins" });
     }; });
-  };
+  
 
   const analyse = async () => {
-    if (!img) return;
-    setLoad(true); setRes(null); setConfetti(false);
-    const gemini = await analyseGemini(img);
-    const smart = gemini || await localSmart(img);
-    setRes(smart);
-    setConfetti(true); setTimeout(()=>setConfetti(false), 2000); setLoad(false);
-  };
+  if (!img) return;
+  setLoad(true); setRes(null); setConfetti(false);
+  const gemini = await analyseGemini(img);
+  if (!gemini) {
+    setLoad(false);
+    return;
+  }
+  setRes(gemini);
+  setConfetti(true); setTimeout(()=>setConfetti(false), 2000); setLoad(false);
+};
+  
 
   return (
     <main style={{ maxWidth: 680, width: "100%", margin: "auto", padding: 16, paddingBottom: 110, fontFamily: "sans-serif", minHeight: "100vh", color: "#111", position: "relative", background: "#E8F5E9", overflow: "hidden" }}>
