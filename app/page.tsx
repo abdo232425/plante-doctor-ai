@@ -2,7 +2,8 @@
 import { useRef, useState } from "react";
 
 export default function Home() {
-  const [lang, setLang] = useState<"ar"|"fr">("ar");
+  const [lang, setLang] = useState<"ar"|"fr">("fr");
+  const [page, setPage] = useState<"home"|"garden">("home");
   const [img, setImg] = useState("");
   const [res, setRes] = useState<any>(null);
   const [load, setLoad] = useState(false);
@@ -19,9 +20,11 @@ export default function Home() {
     aiBadge: "Gemini حقيقي", camBadge: "كاميرا مباشرة",
     health: "الصحة", disease: "المرض", watering: "السقي", light: "الضوء", soil: "التربة", treat: "العلاج", sci: "الاسم العلمي",
     capTitle: "شنو كيعرف يدير التطبيق؟", tipTitle: "نصيحة اليوم", tip: "ما تسقيش النبتة بزاف، خلي التربة تنشف شوية عاد سقيها، و حطها فبلاصة فيها الضو.",
-    gardenTitle: "حديقتي - Mon jardin", gardenSub: "تتبع النمو و السقي ديال نباتاتك",
+    gardenTitle: "حديقتي", gardenSub: "تتبع النمو و السقي ديال نباتاتك",
+    gardenBadge1: "6 نباتات", gardenBadge2: "متابعة حية",
     teamTitle: "فريق البحث", school: "ثانوية عبدالله بن ياسين - إنزكان، أيت ملول", made: "صُنع بحب في المغرب",
     members: "أعضاء الفريق - 4 أشخاص", close: "سد",
+    navHome: "تشخيص", navGarden: "حديقتي",
     caps: ["📸 تحليل أي نبتة من التصويرة بـ Gemini الحقيقي","🌱 يعطيك اسم النبتة الحقيقي و الاسم العلمي","🩺 تشخيص كامل للمرض و الصحة","💧 تتبع السقي و مراحل النمو","🌍 نصائح الضوء و التربة و العلاج","🇲🇦🇫🇷 عربية كاملة أو فرنسية كاملة"],
     plants: [
       { name: "Coléus (Coleus)", img: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400", status: "À surveiller", statusAr: "راقبها", water: "Arrosage dans 4 j", waterAr: "السقي بعد 4 أيام", growth: 65, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" },
@@ -38,9 +41,11 @@ export default function Home() {
     aiBadge: "Vrai Gemini", camBadge: "Caméra en direct",
     health: "Santé", disease: "Maladie", watering: "Arrosage", light: "Lumière", soil: "Sol", treat: "Traitement", sci: "Nom scientifique",
     capTitle: "Que peut faire l'application ?", tipTitle: "Conseil du jour", tip: "Ne pas trop arroser ta plante, laisse sécher la terre un peu avant de l'arroser, et mets-la à la lumière.",
-    gardenTitle: "Mon jardin - حديقتي", gardenSub: "Suivi de la croissance et de l'arrosage",
+    gardenTitle: "Mon jardin", gardenSub: "Suivi de la croissance et de l'arrosage de tes plantes",
+    gardenBadge1: "6 plantes", gardenBadge2: "Suivi en direct",
     teamTitle: "Équipe de Recherche", school: "Lycée Abdellah Ben Yassine - Inezgane, Aït Melloul", made: "Fait avec amour au Maroc",
     members: "Membres - 4 personnes", close: "Fermer",
+    navHome: "Diagnostic", navGarden: "Mon jardin",
     caps: ["📸 Analyser n'importe quelle plante avec le vrai Gemini","🌱 Donner le vrai nom et le nom scientifique","🩺 Diagnostic complet de la maladie et de la santé","💧 Suivi de l'arrosage et des étapes de croissance","🌍 Conseils lumière, sol et traitement","🇲🇦🇫🇷 Tout en arabe ou tout en français"],
     plants: [
       { name: "Coléus (Coleus)", img: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400", status: "À surveiller", statusAr: "راقبها", water: "Arrosage dans 4 j", waterAr: "السقي بعد 4 أيام", growth: 65, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" },
@@ -72,8 +77,8 @@ export default function Home() {
     try {
       const base64 = image.split(",")[1];
       const prompt = lang === "ar"
-        ? "أنت طبيب نباتات خبير. حلل هذه الصورة للنبتة و أعد JSON فقط بدون أي نص آخر: {\"name\":\"اسم النبتة بالعربية\",\"scientific\":\"الاسم العلمي\",\"health\": رقم من 0 إلى 100,\"disease\":\"المرض بالعربية\",\"watering\":\"السقي بالعربية\",\"light\":\"الضوء بالعربية\",\"soil\":\"التربة بالعربية\",\"treatment\":\"العلاج بالعربية مفصل\"} لا تعيد نفس الإجابة، حلل ما تراه فعلا في الصورة."
-        : "Tu es un docteur des plantes expert. Analyse cette photo et retourne UNIQUEMENT du JSON: {\"name\":\"nom en français\",\"scientific\":\"nom scientifique\",\"health\": nombre 0 à 100,\"disease\":\"maladie en français\",\"watering\":\"arrosage en français\",\"light\":\"lumière en français\",\"soil\":\"sol en français\",\"treatment\":\"traitement en français détaillé\"} Ne répète jamais la même réponse, analyse vraiment ce que tu vois.";
+        ? "أنت طبيب نباتات خبير. حلل هذه الصورة للنبتة و أعد JSON فقط: {\"name\":\"اسم النبتة بالعربية\",\"scientific\":\"الاسم العلمي\",\"health\": رقم من 0 إلى 100,\"disease\":\"المرض بالعربية\",\"watering\":\"السقي بالعربية\",\"light\":\"الضوء بالعربية\",\"soil\":\"التربة بالعربية\",\"treatment\":\"العلاج بالعربية مفصل\"} لا تعيد نفس الإجابة."
+        : "Tu es un docteur des plantes expert. Analyse cette photo et retourne UNIQUEMENT du JSON: {\"name\":\"nom en français\",\"scientific\":\"nom scientifique\",\"health\": nombre 0 à 100,\"disease\":\"maladie en français\",\"watering\":\"arrosage en français\",\"light\":\"lumière en français\",\"soil\":\"sol en français\",\"treatment\":\"traitement en français détaillé\"} Ne répète jamais la même réponse.";
       const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: "image/jpeg", data: base64 } }] }] })
@@ -90,11 +95,8 @@ export default function Home() {
     return new Promise<any>((resolve) => { im.onload = () => {
       c.width = 80; c.height = 80; const ctx = c.getContext("2d")!; ctx.drawImage(im, 0, 0, 80, 80);
       const d = ctx.getImageData(0, 0, 80, 80).data;
-      let yellow=0, brown=0, total=0;
-      for (let i=0;i<d.length;i+=4){ const r=d[i], g=d[i+1], b=d[i+2]; total++;
-        if (r>170 && g>150 && b<110) yellow++;
-        if (r>110 && g<85 && b<65) brown++;
-      }
+      let yellow=0, total=0;
+      for (let i=0;i<d.length;i+=4){ const r=d[i], g=d[i+1], b=d[i+2]; total++; if (r>170 && g>150 && b<110) yellow++; }
       if (yellow/total*100 > 18) resolve(lang === "ar" ? { name: "نبتة بأوراق صفراء", scientific: "Chlorosis", health: 56, disease: "اصفرار الأوراق", watering: "مرة كل 3 أيام", light: "ضوء غير مباشر قوي", soil: "تربة غنية بالحديد", treatment: "نقص السقي + سماد حديد" } : { name: "Plante à feuilles jaunes", scientific: "Chlorosis", health: 56, disease: "Jaunissement", watering: "1 fois tous les 3 jours", light: "Lumière indirecte forte", soil: "Sol riche en fer", treatment: "Moins d'eau + engrais fer" });
       else resolve(lang === "ar" ? { name: "نبتة صحية - مونستيرا", scientific: "Monstera deliciosa", health: 92, disease: "سليمة", watering: "مرتين في الأسبوع", light: "ضوء غير مباشر", soil: "تربة جيدة", treatment: "حافظ على نفس العناية" } : { name: "Plante saine - Monstera", scientific: "Monstera deliciosa", health: 92, disease: "Saine", watering: "2 fois par semaine", light: "Lumière indirecte", soil: "Bon sol", treatment: "Garde les mêmes soins" });
     }; });
@@ -110,7 +112,7 @@ export default function Home() {
   };
 
   return (
-    <main style={{ maxWidth: 680, width: "100%", margin: "auto", padding: 16, paddingBottom: 90, fontFamily: "sans-serif", minHeight: "100vh", color: "#111", position: "relative", background: "#E8F5E9", overflow: "hidden" }}>
+    <main style={{ maxWidth: 680, width: "100%", margin: "auto", padding: 16, paddingBottom: 110, fontFamily: "sans-serif", minHeight: "100vh", color: "#111", position: "relative", background: "#E8F5E9", overflow: "hidden" }}>
       <style>{`
         @keyframes float{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
         @keyframes shine{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
@@ -120,6 +122,7 @@ export default function Home() {
         @keyframes iMove{0%,100%{transform:translateY(0) rotate(0deg); box-shadow:0 0 10px #FFD700}50%{transform:translateY(-6px) rotate(5deg); box-shadow:0 0 20px #FFD700, 0 0 30px #FFA500}}
         .logo{animation:float 2.5s infinite; display:inline-block}
         .shine{background:linear-gradient(90deg,#0F3D2E,#1a7a4a,#E86A33,#FF8A3D,#0F3D2E); background-size:300% 300%; animation:shine 5s infinite; color:#fff}
+        .shineGarden{background:linear-gradient(90deg,#0F3D2E,#22c55e,#F59E0B,#E86A33,#0F3D2E); background-size:300% 300%; animation:shine 5s infinite; color:#fff}
         .glowAI{animation:glowAI 1.8s infinite; font-weight:900; color:#FFD700; font-size:18px}
         .confetti{position:absolute; top:0; font-size:20px; animation:fall 2s forwards}
         .topLogo{animation:pulseLogo 2s infinite; display:inline-flex; align-items:center; gap:6px}
@@ -127,6 +130,7 @@ export default function Home() {
         .iBtn{animation:iMove 2s infinite !important}
       `}</style>
 
+      {/* نفس الخلفية فالصفحتين بجوج - أوراق كيطيحو */}
       <span className="falling" style={{ left: "5%", animationDuration: "7s" }}>🌿</span>
       <span className="falling" style={{ left: "18%", animationDuration: "9s", animationDelay: "1s" }}>🍃</span>
       <span className="falling" style={{ left: "32%", animationDuration: "8s", animationDelay: "2s" }}>🌱</span>
@@ -146,8 +150,10 @@ export default function Home() {
         <button onClick={() => setLang(lang==="ar"?"fr":"ar")} style={{ padding: "6px 10px", border: "none", background: "transparent", fontWeight: "bold", fontSize: 13, color: "#0F3D2E", cursor: "pointer" }}>{lang==="ar" ? "🇫🇷 Français" : "🇲🇦 العربية"}</button>
       </div>
 
+      {/* ============ الصفحة اللولة - Diagnostic ============ */}
+      {page === "home" && <>
       <div className="shine" style={{ padding: 22, borderRadius: 22, textAlign: "center", marginTop: 10 }}>
-        <div className="logo" style={{ fontSize: 62, background: "#fff", width: 92, height: 92, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "auto", boxShadow: "0 8px 20px rgba(0,0,0,0.25)" }}>🪴</div>
+        <div className="logo" style={{ fontSize: 62, background: "#fff", width: 92, height: 92, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "auto", boxShadow: "0 8px 20px rgba(0,0,0,0.25)" }}>🩺</div>
         <h1 style={{ margin: "10px 0 5px 0", fontSize: 26 }}>{T.title} <span className="glowAI">AI</span></h1>
         <p style={{ margin: 0, fontSize: 14 }}>{T.sub}</p>
         <div style={{ marginTop: 10, display: "flex", justifyContent: "center", gap: 8 }}>
@@ -187,13 +193,24 @@ export default function Home() {
           <p style={{ margin: "6px 0 0 0", fontSize: 13, lineHeight: 1.6 }}>{T.tip}</p>
         </div>
       </div>
+      </>}
 
-      <div style={{ background: "#F0FDF4", padding: 16, borderRadius: 18, marginTop: 12, border: "1px solid #BBF7D0" }}>
-        <h3 style={{ margin: "0 0 4px 0", color: "#0F3D2E", fontSize: 20 }}>{T.gardenTitle}</h3>
-        <p style={{ margin: "0 0 12px 0", fontSize: 13, color: "#666" }}>{T.gardenSub}</p>
+      {/* ============ الصفحة التانية - Mon jardin - مزوقة كيما اللولة ============ */}
+      {page === "garden" && <>
+      <div className="shineGarden" style={{ padding: 22, borderRadius: 22, textAlign: "center", marginTop: 10 }}>
+        <div className="logo" style={{ fontSize: 62, background: "#fff", width: 92, height: 92, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "auto", boxShadow: "0 8px 20px rgba(0,0,0,0.25)" }}>🌿</div>
+        <h1 style={{ margin: "10px 0 5px 0", fontSize: 26 }}>{T.gardenTitle}</h1>
+        <p style={{ margin: 0, fontSize: 14 }}>{T.gardenSub}</p>
+        <div style={{ marginTop: 10, display: "flex", justifyContent: "center", gap: 8 }}>
+          <span style={{ background: "rgba(255,255,255,0.25)", padding: "5px 10px", borderRadius: 20, fontSize: 12 }}>🪴 {T.gardenBadge1}</span>
+          <span style={{ background: "rgba(255,255,255,0.25)", padding: "5px 10px", borderRadius: 20, fontSize: 12 }}>💧 {T.gardenBadge2}</span>
+        </div>
+      </div>
+
+      <div style={{ marginTop: 12 }}>
         {T.plants.map((p: any, i: number) => (
-          <div key={i} style={{ background: "#fff", padding: 12, borderRadius: 16, marginBottom: 10, display: "flex", gap: 12, alignItems: "center", boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
-            <img src={p.img} alt={p.name} style={{ width: 80, height: 80, borderRadius: 14, objectFit: "cover", flexShrink: 0 }} />
+          <div key={i} style={{ background: "#fff", padding: 12, borderRadius: 18, marginBottom: 10, display: "flex", gap: 12, alignItems: "center", boxShadow: "0 4px 18px rgba(0,0,0,0.06)", border: "1px solid #BBF7D0" }}>
+            <img src={p.img} alt={p.name} style={{ width: 85, height: 85, borderRadius: 14, objectFit: "cover", flexShrink: 0 }} />
             <div style={{ flex: 1 }}>
               <b style={{ fontSize: 15, color: "#0F3D2E" }}>{p.name}</b>
               <div style={{ marginTop: 6 }}><span style={{ background: p.status === "Alerte" ? "#FEE2E2" : "#FEF3C7", color: p.status === "Alerte" ? "#991B1B" : "#92400E", padding: "4px 10px", borderRadius: 20, fontSize: 12, fontWeight: "bold" }}>{lang === "ar" ? p.statusAr : p.status}</span></div>
@@ -205,10 +222,21 @@ export default function Home() {
         ))}
       </div>
 
+      <div style={{ background: "linear-gradient(135deg,#FEF3C7,#FFF8E7)", padding: 14, borderRadius: 14, marginTop: 4, borderRight: lang === "ar" ? "4px solid #22c55e" : "none", borderLeft: lang === "fr" ? "4px solid #22c55e" : "none" }}>
+        <b style={{ fontSize: 14 }}>💡 {T.tipTitle}</b>
+        <p style={{ margin: "6px 0 0 0", fontSize: 13, lineHeight: 1.6 }}>{T.tip}</p>
+      </div>
+      </>}
+
       <p style={{ textAlign: "center", fontSize: 12, color: "#888", marginTop: 12 }}>{T.made}</p>
       </div>
 
-      <button onClick={() => setShowTeam(true)} className="iBtn" style={{ position: "fixed", bottom: 16, right: 16, zIndex: 90, width: 44, height: 44, borderRadius: "50%", background: "#fff", color: "#0F3D2E", border: "2px solid #FFD700", fontSize: 20, fontWeight: "bold", cursor: "pointer" }}>i</button>
+      <button onClick={() => setShowTeam(true)} className="iBtn" style={{ position: "fixed", bottom: 88, right: 16, zIndex: 90, width: 44, height: 44, borderRadius: "50%", background: "#fff", color: "#0F3D2E", border: "2px solid #FFD700", fontSize: 20, fontWeight: "bold", cursor: "pointer" }}>i</button>
+
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 80, background: "#fff", borderTop: "1px solid #eee", padding: "10px 12px", display: "flex", gap: 10, boxShadow: "0 -2px 12px rgba(0,0,0,0.08)" }}>
+        <button onClick={() => setPage("home")} style={{ flex: 1, padding: 12, borderRadius: 14, border: "none", background: page === "home" ? "linear-gradient(135deg,#0F3D2E,#1a7a4a)" : "#F3F4F6", color: page === "home" ? "#fff" : "#0F3D2E", fontWeight: "bold", fontSize: 14, cursor: "pointer" }}>🩺 {T.navHome}</button>
+        <button onClick={() => setPage("garden")} style={{ flex: 1, padding: 12, borderRadius: 14, border: "none", background: page === "garden" ? "linear-gradient(135deg,#E86A33,#FF8A3D)" : "#F3F4F6", color: page === "garden" ? "#fff" : "#0F3D2E", fontWeight: "bold", fontSize: 14, cursor: "pointer" }}>🌿 {T.navGarden}</button>
+      </div>
 
       {showTeam && <div onClick={() => setShowTeam(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 20 }}>
         <div onClick={e => e.stopPropagation()} style={{ background: "#fff", width: "100%", maxWidth: 380, borderRadius: 16, padding: 20, textAlign: "center" }}>
