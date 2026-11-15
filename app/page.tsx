@@ -91,15 +91,7 @@ export default function Home() {
   };
 
   
-    const c = document.createElement("canvas"); const im = new Image(); im.src = image;
-    return new Promise<any>((resolve) => { im.onload = () => {
-      c.width = 80; c.height = 80; const ctx = c.getContext("2d")!; ctx.drawImage(im, 0, 0, 80, 80);
-      const d = ctx.getImageData(0, 0, 80, 80).data;
-      let yellow=0, total=0;
-      for (let i=0;i<d.length;i+=4){ const r=d[i], g=d[i+1], b=d[i+2]; total++; if (r>170 && g>150 && b<110) yellow++; }
-      if (yellow/total*100 > 18) resolve(lang === "ar" ? { name: "نبتة بأوراق صفراء", scientific: "Chlorosis", health: 56, disease: "اصفرار الأوراق", watering: "مرة كل 3 أيام", light: "ضوء غير مباشر قوي", soil: "تربة غنية بالحديد", treatment: "نقص السقي + سماد حديد" } : { name: "Plante à feuilles jaunes", scientific: "Chlorosis", health: 56, disease: "Jaunissement", watering: "1 fois tous les 3 jours", light: "Lumière indirecte forte", soil: "Sol riche en fer", treatment: "Moins d'eau + engrais fer" });
-      else resolve(lang === "ar" ? { name: "نبتة صحية - مونستيرا", scientific: "Monstera deliciosa", health: 92, disease: "سليمة", watering: "مرتين في الأسبوع", light: "ضوء غير مباشر", soil: "تربة جيدة", treatment: "حافظ على نفس العناية" } : { name: "Plante saine - Monstera", scientific: "Monstera deliciosa", health: 92, disease: "Saine", watering: "2 fois par semaine", light: "Lumière indirecte", soil: "Bon sol", treatment: "Garde les mêmes soins" });
-    }; });
+   
   
 
   const analyse = async () => {
