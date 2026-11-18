@@ -140,7 +140,7 @@ export default function Home() {
   };
 
   return (
-    <main style={{ maxWidth: 680, width: "100%", margin: "auto", padding: 16, paddingBottom: 110, fontFamily: "sans-serif", minHeight: "100vh", color: "#111", position: "relative", background: "#E8F5E9", overflow: "hidden", colorScheme: "light" }}>
+    <main style={{ maxWidth: 680, width: "100%", margin: "auto", padding: 16, paddingBottom: 80, fontFamily: "sans-serif", minHeight: "auto", color: "#111", position: "relative", background: "#E8F5E9", overflow: "hidden", colorScheme: "light" }}>
       <style>{`
         @keyframes float{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
         @keyframes shine{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
@@ -247,7 +247,7 @@ export default function Home() {
       </div>
       </>}
 
-      <p style={{ textAlign: "center", fontSize: 12, color: "#888", marginTop: 12 }}>{T.made}</p>
+      {/* texte en bas supprime pour enlever espace vide */}
       </div>
 
       <button onClick={() => setShowTeam(true)} className="iBtn" style={{ position: "fixed", bottom: 88, right: 16, zIndex: 90, width: 44, height: 44, minWidth: 44, minHeight: 44, borderRadius: "50%", background: "#ffffff", color: "#0F3D2E", border: "2px solid #FFD700", fontSize: 22, fontWeight: "900", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", lineHeight: "1", padding: 0, whiteSpace: "nowrap", overflow: "hidden", flexShrink: 0 }}>i</button>
