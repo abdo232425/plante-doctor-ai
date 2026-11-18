@@ -1,158 +1,284 @@
- "use client";
-import { useState, useEffect, useRef } from "react";
-
-type PlantResult = { name: string; scientific: string; health: number; problems: string[]; solution: string; watering: string; };
-type GardenPlant = { id: number; name: string; image: string; date: string; health: number; stage: string; lastWater: string; };
-
-const FALLING = ["🌿","🍃","🌱","🌸","🌺","🍀","🌻","🌹"];
+"use client";
+import { useRef, useState } from "react";
 
 export default function Home() {
-  const [page, setPage] = useState<"diag" | "jardin">("diag");
-  const [lang, setLang] = useState<"fr" | "ar">("fr");
-  const [image, setImage] = useState<string | null>(null);
-  const [result, setResult] = useState<PlantResult | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [lang, setLang] = useState<"ar"|"fr">("fr");
+  const [page, setPage] = useState<"home"|"garden">("home");
+  const [img, setImg] = useState("");
+  const [res, setRes] = useState<any>(null);
+  const [load, setLoad] = useState(false);
+  const [showCam, setShowCam] = useState(false);
+  const [showTeam, setShowTeam] = useState(false);
+  const [confetti, setConfetti] = useState(false);
   const [errMsg, setErrMsg] = useState("");
-  const [garden, setGarden] = useState<GardenPlant[]>([]);
-  const [showInfo, setShowInfo] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const [myPlants, setMyPlants] = useState<any[]>([]);
+  const videoRef = useRef<any>(null);
+  const streamRef = useRef<any>(null);
 
-  useEffect(() => {
-    const s = localStorage.getItem("mon-jardin");
-    if (s) setGarden(JSON.parse(s));
-  }, []);
-  useEffect(() => { localStorage.setItem("mon-jardin", JSON.stringify(garden)); }, [garden]);
+  const T = lang === "ar" ? {
+    title: "طبيب النباتات", sub: "صور نبتتك و خلي AI الحقيقي يشخصها ليك",
+    cam: "افتح الكاميرا", gal: "من المعرض", take: "التقط الصورة",
+    analyse: "حلل نبتتي بـ AI", analysing: "AI كيحلل بدقة...",
+    aiBadge: "AI دقيق", camBadge: "كاميرا مباشرة",
+    health: "الصحة", disease: "المرض", watering: "السقي", light: "الضوء", soil: "التربة", treat: "العلاج", sci: "الاسم العلمي",
+    capTitle: "شنو كيعرف يدير التطبيق؟", tipTitle: "نصيحة اليوم", tip: "ما تسقيش النبتة بزاف، خلي التربة تنشف شوية عاد سقيها، و حطها فبلاصة فيها الضو.",
+    gardenTitle: "حديقتي", gardenSub: "تتبع النمو و السقي ديال نباتاتك",
+    gardenBadge1: "6 نباتات", gardenBadge2: "متابعة حية",
+    teamTitle: "فريق البحث", school: "ثانوية عبدالله بن ياسين - إنزكان، أيت ملول", made: "صُنع بحب في المغرب",
+    members: "أعضاء الفريق - 4 أشخاص", close: "سد",
+    navHome: "تشخيص", navGarden: "حديقتي",
+    caps: ["📸 تحليل أي نبتة من التصويرة بـ AI الدقيق","🌱 يعطيك اسم النبتة الحقيقي و الاسم العلمي","🩺 تشخيص دقيق للمرض و الصحة","💧 تتبع السقي و مراحل النمو","🌍 نصائح الضوء و التربة و العلاج","🇲🇦🇫🇷 عربية كاملة أو فرنسية كاملة"],
+    plants: [
+      { name: "Coléus (Coleus)", img: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400", status: "À surveiller", statusAr: "راقبها", water: "Arrosage dans 4 j", waterAr: "السقي بعد 4 أيام", growth: 65, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" },
+      { name: "Olivier", img: "https://images.unsplash.com/photo-1445264718234-a623be589d37?w=400", status: "À surveiller", statusAr: "راقبها", water: "Arrosage dans 4 j", waterAr: "السقي بعد 4 أيام", growth: 80, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" },
+      { name: "Vigne (Vitis vinifera)", img: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=400", status: "Alerte", statusAr: "خطر", water: "Arrosage dans 4 j", waterAr: "السقي بعد 4 أيام", growth: 45, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" },
+      { name: "Poirier", img: "https://images.unsplash.com/photo-1470003757653-a6d8d5d7d5a8?w=400", status: "À surveiller", statusAr: "راقبها", water: "Arrosage dans 4 j", waterAr: "السقي بعد 4 أيام", growth: 70, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" },
+      { name: "Pomme de terre (Solanum tuberosum)", img: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=400", status: "Alerte", statusAr: "خطر", water: "Arrosage dans 3 j", waterAr: "السقي بعد 3 أيام", growth: 35, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" },
+      { name: "Olivier", img: "https://images.unsplash.com/photo-1470058869958-2a77ade41c02?w=400", status: "À surveiller", statusAr: "راقبها", water: "Arrosage dans 2 j", waterAr: "السقي بعد يومين", growth: 90, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" },
+    ]
+  } : {
+    title: "Plante Doctor", sub: "Prends ta plante en photo, le vrai AI la diagnostique avec précision",
+    cam: "Ouvrir Caméra", gal: "Galerie", take: "Prendre photo",
+    analyse: "Analyser avec AI", analysing: "AI analyse avec précision...",
+    aiBadge: "AI précis", camBadge: "Caméra en direct",
+    health: "Santé", disease: "Maladie", watering: "Arrosage", light: "Lumière", soil: "Sol", treat: "Traitement", sci: "Nom scientifique",
+    capTitle: "Que peut faire l'application ?", tipTitle: "Conseil du jour", tip: "Ne pas trop arroser ta plante, laisse sécher la terre un peu avant de l'arroser, et mets-la à la lumière.",
+    gardenTitle: "Mon jardin", gardenSub: "Suivi de la croissance et de l'arrosage de tes plantes",
+    gardenBadge1: "6 plantes", gardenBadge2: "Suivi en direct",
+    teamTitle: "Équipe de Recherche", school: "Lycée Abdellah Ben Yassine - Inezgane, Aït Melloul", made: "Fait avec amour au Maroc",
+    members: "Membres - 4 personnes", close: "Fermer",
+    navHome: "Diagnostic", navGarden: "Mon jardin",
+    caps: ["📸 Analyser n'importe quelle plante avec AI précis","🌱 Donner le vrai nom et le nom scientifique","🩺 Diagnostic précis de la maladie et de la santé","💧 Suivi de l'arrosage et des étapes de croissance","🌍 Conseils lumière, sol et traitement","🇲🇦🇫🇷 Tout en arabe ou tout en français"],
+    plants: [
+      { name: "Coléus (Coleus)", img: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400", status: "À surveiller", statusAr: "راقبها", water: "Arrosage dans 4 j", waterAr: "السقي بعد 4 أيام", growth: 65, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" },
+      { name: "Olivier", img: "https://images.unsplash.com/photo-1445264718234-a623be589d37?w=400", status: "À surveiller", statusAr: "راقبها", water: "Arrosage dans 4 j", waterAr: "السقي بعد 4 أيام", growth: 80, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" },
+      { name: "Vigne (Vitis vinifera)", img: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=400", status: "Alerte", statusAr: "خطر", water: "Arrosage dans 4 j", waterAr: "السقي بعد 4 أيام", growth: 45, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" },
+      { name: "Poirier", img: "https://images.unsplash.com/photo-1470003757653-a6d8d5d7d5a8?w=400", status: "À surveiller", statusAr: "راقبها", water: "Arrosage dans 4 j", waterAr: "السقي بعد 4 أيام", growth: 70, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" },
+      { name: "Pomme de terre (Solanum tuberosum)", img: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=400", status: "Alerte", statusAr: "خطر", water: "Arrosage dans 3 j", waterAr: "السقي بعد 3 أيام", growth: 35, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" },
+      { name: "Olivier", img: "https://images.unsplash.com/photo-1470058869958-2a77ade41c02?w=400", status: "À surveiller", statusAr: "راقبها", water: "Arrosage dans 2 j", waterAr: "السقي بعد يومين", growth: 90, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" },
+    ]
+  };
 
-  async function callAI(model: string, base64: string, prompt: string, key: string) {
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: "image/jpeg", data: base64 } }] }], generationConfig: { temperature: 0, responseMimeType: "application/json" } })
+  const openCam = async () => {
+    try { setShowCam(true); const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }); streamRef.current = s; setTimeout(() => { if (videoRef.current) videoRef.current.srcObject = s; }, 300); }
+    catch { alert(lang === "ar" ? "سمح للكاميرا" : "Autorise la caméra"); setShowCam(false); }
+  };
+  const takePhoto = () => {
+    const c = document.createElement("canvas"); c.width = videoRef.current.videoWidth; c.height = videoRef.current.videoHeight;
+    c.getContext("2d")?.drawImage(videoRef.current, 0, 0); setImg(c.toDataURL("image/jpeg", 0.85));
+    streamRef.current?.getTracks().forEach((t: any) => t.stop()); setShowCam(false);
+  };
+  const onFile = (e: any) => {
+    const f = e.target.files[0]; if (!f) return;
+    const r = new FileReader(); r.onload = () => { setImg(r.result as string); setShowCam(false); }; r.readAsDataURL(f); e.target.value = "";
+  };
+
+  // ===== AI - أدق نسخة - temperature 0 = ما كيخترعش =====
+  const callAI = async (model: string, base64: string, prompt: string, key: string) => {
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: "image/jpeg", data: base64 } }] }],
+        generationConfig: { temperature: 0, topP: 0.1, topK: 1, maxOutputTokens: 800 }
+      })
     });
-    return await res.json();
-  }
+    return await r.json();
+  };
 
-  async function analyseAI(image: string) {
-    setLoading(true); setErrMsg(""); setResult(null);
-    const key = process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
-    if (!key) { setErrMsg(lang === "fr" ? "AI : Clé non configurée" : "AI : المفتاح غير موجود"); setLoading(false); return; }
+  const analyseAI = async (image: string) => {
+    const key = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    if (!key) {
+      setErrMsg(lang === "ar" ? "المفتاح ما كاينش في Vercel" : "Clé manquante dans Vercel");
+      return null;
+    }
     const base64 = image.split(",")[1];
-    const prompt = lang === "fr"
-      ? `Tu es un expert des plantes très précis. Ta mission: regarde la photo et dis ce que tu vois VRAIMENT: couleur des feuilles, forme de la feuille, fleurs. Ne devine pas. Si tu n'es pas sûr, dis "Plante non identifiée" dans le nom. Réponds UNIQUEMENT ce JSON: {"name":"vrai nom en français","scientific":"vrai nom scientifique","health":85,"problems":["problème 1"],"solution":"solution en français","watering":"arrosage en français"} Étape 3: si tu n'es pas sûr, dis Plante non identifiée.`
-      : `أنت خبير نباتات دقيق جدا. انظر للصورة وقل ما تراه فعلا: لون الأوراق، شكل الورقة، الأزهار. لا تخمن. إذا لم تكن متأكدا قل "نبتة غير معروفة". أجب فقط بهذا JSON: {"name":"الاسم الحقيقي بالعربية","scientific":"الاسم العلمي","health":85,"problems":["المشكلة"],"solution":"الحل بالعربية","watering":"السقي بالعربية"}`;
-    // Ordre rapide d'abord : lite le plus rapide, puis 3-flash, puis 3.8-flash le plus fort
+    const prompt = lang === "ar"
+      ? `أنت طبيب نباتات خبير ودقيق جدا. مهمتك: انظر للصورة بعناية شديدة.
+      الخطوة 1: صف ما تراه فعلا: لون الأوراق، شكل الورقة، شكل الزهرة، الساق.
+      الخطوة 2: بناء على ما رأيته فقط، حدد اسم النبتة. لا تخمن. لا تقل مونستيرا أبدا إلا إذا رأيت أوراقا مثقوبة كبيرة فعلا.
+      الخطوة 3: إذا لم تكن متأكدا، قل "نبتة غير محددة" في الاسم.
+      أعد فقط JSON: {"name":"الاسم الحقيقي بالعربية","scientific":"الاسم العلمي","health": رقم 0-100 حسب ما تراه فعلا,"disease":"المرض الظاهر فعلا بالعربية","watering":"السقي بالعربية","light":"الضوء بالعربية","soil":"التربة بالعربية","treatment":"العلاج بالعربية"}`
+      : `Tu es un docteur des plantes expert et très précis. Ta mission: regarde la photo avec une extrême attention.
+      Étape 1: Décris ce que tu vois VRAIMENT: couleur des feuilles, forme de la feuille, forme de la fleur, tige.
+      Étape 2: D'après ce que tu as vu UNIQUEMENT, identifie la plante. Ne devine pas. Ne dis JAMAIS Monstera sauf si tu vois vraiment de grandes feuilles trouées.
+      Étape 3: Si tu n'es pas sûr, dis "Plante non identifiée" dans le nom.
+      Retourne UNIQUEMENT ce JSON: {"name":"vrai nom en français","scientific":"vrai nom scientifique","health": nombre 0-100 selon ce que tu vois vraiment,"disease":"maladie visible vraiment en français","watering":"arrosage en français","light":"lumière en français","soil":"sol en français","treatment":"traitement en français"}`;
+
     for (const model of ["gemini-3.5-flash-lite", "gemini-3-flash", "gemini-3.8-flash"]) {
       try {
-        const j: any = await callAI(model, base64, prompt, key);
+        const j = await callAI(model, base64, prompt, key);
         if (j.error) { setErrMsg(`AI: ${j.error.message}`); continue; }
-        const text = j.candidates?.[0]?.content?.parts?.[0]?.text || "";
-        if (!text) continue;
-        const start = text.indexOf("{");
-        const end = text.lastIndexOf("}") + 1;
-        if (start < 0 || end === 0) continue;
-        const parsed = JSON.parse(text.slice(start, end));
+        let txt = j.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        if (!txt) continue;
+        const start = txt.indexOf("{");
+        const end = txt.lastIndexOf("}") + 1;
+        if (start === -1 || end === 0) continue;
+        const parsed = JSON.parse(txt.slice(start, end));
+        if (!parsed.name) continue;
         if (typeof parsed.health !== "number") parsed.health = 75;
         if (parsed.health < 0) parsed.health = 0;
         if (parsed.health > 100) parsed.health = 100;
-        setResult(parsed);
-        // AUTO : des que c est analyse, on la met direct dans Mon jardin, sans cliquer
-        const autoPlant: GardenPlant = {
-          id: Date.now(),
-          name: parsed.name,
-          image: image,
-          date: new Date().toLocaleDateString("fr-FR"),
-          health: parsed.health,
-          stage: "Jeune plante",
-          lastWater: new Date().toLocaleDateString("fr-FR"),
-        };
-        setGarden((prev) => {
-          const next = [autoPlant, ...prev];
-          localStorage.setItem("mon-jardin", JSON.stringify(next));
-          return next;
-        });
-        setLoading(false);
-        return;
+        setErrMsg("");
+        return parsed;
       } catch (e: any) { setErrMsg(`AI: ${e.message}`); continue; }
     }
-    setLoading(false);
-  }
+    return null;
+  };
 
-  function onFile(e: any) {
-    const f = e.target.files?.[0];
-    if (!f) return;
-    const r = new FileReader();
-    r.onload = () => { const v = r.result as string; setImage(v); analyseAI(v); };
-    r.readAsDataURL(f);
-  }
-
-  function addToGarden() {
-    if (!image || !result) return;
-    const np: GardenPlant = { id: Date.now(), name: result.name, image, date: new Date().toLocaleDateString("fr-FR"), health: result.health, stage: "Jeune plante", lastWater: new Date().toLocaleDateString("fr-FR") };
-    setGarden([np, ...garden]);
-    setPage("jardin");
-  }
-
-  function waterPlant(id: number) { setGarden(garden.map(p => p.id === id ? { ...p, lastWater: new Date().toLocaleDateString("fr-FR") } : p)); }
-  function removePlant(id: number) { setGarden(garden.filter(p => p.id !== id)); }
+  const analyse = async () => {
+    if (!img) return;
+    setLoad(true); setRes(null); setErrMsg(""); setConfetti(false);
+    const ai = await analyseAI(img);
+    if (ai) {
+      setRes(ai);
+      // AUTO : تحط بوحدها في Mon jardin
+      const newPlant = { name: ai.name + " (" + ai.scientific + ")", img: img, status: ai.health > 70 ? "À surveiller" : "Alerte", statusAr: ai.health > 70 ? "راقبها" : "خطر", water: ai.watering, waterAr: ai.watering, growth: ai.health, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" };
+      setMyPlants((prev) => [newPlant, ...prev]);
+      setConfetti(true); setTimeout(()=>setConfetti(false), 2000);
+    }
+    setLoad(false);
+  };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f0fdf4", position: "relative", overflow: "hidden", fontFamily: "Arial, sans-serif", paddingBottom: 90 }}>
-      <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0 }}>
-        {FALLING.map((e, i) => (<span key={i} style={{ position: "absolute", left: `${(i * 12) % 100}%`, top: -20, fontSize: 26, animation: `fall ${6 + i}s linear infinite`, animationDelay: `${i * 0.8}s` }}>{e}</span>))}
+    <main style={{ maxWidth: 680, width: "100%", margin: "auto", padding: 16, paddingBottom: 110, fontFamily: "sans-serif", minHeight: "100vh", color: "#111", position: "relative", background: "#E8F5E9", overflow: "hidden", colorScheme: "light" }}>
+      <style>{`
+        @keyframes float{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
+        @keyframes shine{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+        @keyframes fall{0%{transform:translateY(-60px) rotate(0deg); opacity:0}10%{opacity:1}100%{transform:translateY(110vh) rotate(360deg); opacity:0}}
+        @keyframes glowAI{0%,100%{text-shadow:0 0 8px #FFD700}50%{text-shadow:0 0 18px #FFD700, 0 0 30px #FFA500}}
+        @keyframes pulseLogo{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+        @keyframes iMove{0%,100%{transform:translateY(0) rotate(0deg); box-shadow:0 0 10px #FFD700}50%{transform:translateY(-6px) rotate(5deg); box-shadow:0 0 20px #FFD700, 0 0 30px #FFA500}}
+        .logo{animation:float 2.5s infinite; display:inline-block}
+        .shine{background:linear-gradient(90deg,#0F3D2E,#1a7a4a,#E86A33,#FF8A3D,#0F3D2E); background-size:300% 300%; animation:shine 5s infinite; color:#fff}
+        .shineGarden{background:linear-gradient(90deg,#0F3D2E,#22c55e,#F59E0B,#E86A33,#0F3D2E); background-size:300% 300%; animation:shine 5s infinite; color:#fff}
+        .glowAI{animation:glowAI 1.8s infinite; font-weight:900; color:#FFD700; font-size:22px}
+        .confetti{position:absolute; top:0; font-size:20px; animation:fall 2s forwards}
+        .topLogo{animation:pulseLogo 2s infinite; display:inline-flex; align-items:center; gap:6px}
+        .falling{position:absolute; top:0; font-size:26px; animation:fall linear infinite; opacity:0.7; pointer-events:none; z-index:0}
+        .iBtn{animation:iMove 2s infinite !important}
+      `}</style>
+
+      <span className="falling" style={{ left: "5%", animationDuration: "7s" }}>🌿</span>
+      <span className="falling" style={{ left: "18%", animationDuration: "9s", animationDelay: "1s" }}>🍃</span>
+      <span className="falling" style={{ left: "32%", animationDuration: "8s", animationDelay: "2s" }}>🌱</span>
+      <span className="falling" style={{ left: "48%", animationDuration: "10s", animationDelay: "0.5s" }}>🪴</span>
+      <span className="falling" style={{ left: "62%", animationDuration: "7s", animationDelay: "1.5s" }}>🌿</span>
+      <span className="falling" style={{ left: "78%", animationDuration: "9s", animationDelay: "0.2s" }}>🍃</span>
+      <span className="falling" style={{ left: "90%", animationDuration: "8s", animationDelay: "2.5s" }}>🌱</span>
+
+      {confetti && <div style={{ position: "absolute", top: 0, left: 0, right: 0, textAlign: "center", zIndex: 99, pointerEvents: "none" }}><span className="confetti" style={{ left: "15%" }}>🌸</span><span className="confetti" style={{ left: "50%" }}>⭐</span><span className="confetti" style={{ left: "80%" }}>✨</span></div>}
+
+      <div style={{ position: "relative", zIndex: 1 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <span className="topLogo" style={{ fontWeight: "900", fontSize: 22, color: "#0F3D2E" }}>
+          <span style={{ background: "linear-gradient(135deg,#22c55e,#0F3D2E)", color: "#fff", width: 36, height: 36, borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>🌿</span>
+          Plante Doctor <span className="glowAI">AI</span>
+        </span>
+        <button onClick={() => setLang(lang==="ar"?"fr":"ar")} style={{ padding: "6px 10px", border: "none", background: "transparent", fontWeight: "bold", fontSize: 13, color: "#0F3D2E", cursor: "pointer" }}>{lang==="ar" ? "🇫🇷 Français" : "🇲🇦 العربية"}</button>
       </div>
-      <style>{`@keyframes fall { to { transform: translateY(110vh) rotate(360deg); } } @keyframes shine { 0%{box-shadow:0 0 0 0 rgba(34,197,94,.6)} 100%{box-shadow:0 0 0 14px rgba(34,197,94,0)} }`}</style>
 
-      <header style={{ position: "relative", zIndex: 2, display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 18px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}><span style={{ fontSize: 32 }}>🌿</span><b style={{ fontSize: 20, color: "#166534" }}>Plante Doctor AI</b></div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <button onClick={() => setLang(lang === "fr" ? "ar" : "fr")} style={{ border: "1px solid #22c55e", background: "white", borderRadius: 20, padding: "6px 12px", cursor: "pointer" }}>{lang === "fr" ? "العربية" : "Français"}</button>
-          <button onClick={() => setShowInfo(!showInfo)} style={{ width: 36, height: 36, borderRadius: "50%", background: "#22c55e", color: "white", border: "none", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: "bold", cursor: "pointer", whiteSpace: "nowrap", overflow: "hidden", flexShrink: 0, animation: "shine 1.5s infinite" }}>i</button>
+      {page === "home" && <>
+      <div className="shine" style={{ padding: 22, borderRadius: 22, textAlign: "center", marginTop: 10 }}>
+        <div className="logo" style={{ fontSize: 62, background: "#fff", width: 92, height: 92, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "auto", boxShadow: "0 8px 20px rgba(0,0,0,0.25)" }}>🩺</div>
+        <h1 style={{ margin: "10px 0 5px 0", fontSize: 28 }}>{T.title} <span className="glowAI">AI</span></h1>
+        <p style={{ margin: 0, fontSize: 14 }}>{T.sub}</p>
+        <div style={{ marginTop: 10, display: "flex", justifyContent: "center", gap: 8 }}>
+          <span style={{ background: "rgba(255,255,255,0.25)", padding: "5px 10px", borderRadius: 20, fontSize: 12 }}>🤖✨ {T.aiBadge}</span>
+          <span style={{ background: "rgba(255,255,255,0.25)", padding: "5px 10px", borderRadius: 20, fontSize: 12 }}>📸 {T.camBadge}</span>
         </div>
-      </header>
+      </div>
 
-      {showInfo && (<div style={{ position: "relative", zIndex: 2, margin: "0 18px", background: "white", borderRadius: 16, padding: 16, boxShadow: "0 4px 20px rgba(0,0,0,.1)" }}>
-        <h3>{lang === "fr" ? "Comment ça marche ?" : "كيفاش كيخدم؟"}</h3>
-        <p>{lang === "fr" ? "1. Prends une photo de ta plante. 2. L'AI analyse la photo. 3. Tu reçois le nom, la santé, les problèmes et la solution." : "1. صور نبتتك. 2. الذكاء الاصطناعي كيحلل التصويرة. 3. كتوصلك السمية والصحة والمشاكل والحل."}</p>
-        <p><b>{lang === "fr" ? "Équipe :" : "الفريق :"}</b><br />1. Abdeladim Zouhir<br />2. Hafsa Abdelmoumen<br />3. Arwa Akoujim<br />4. Fatima Zahra El Maachi<br />Lycée Abdellah Ben Yassine - Inezgane, Aït Melloul</p>
-      </div>)}
+      <div style={{ background: "#fff", padding: 14, borderRadius: 18, marginTop: 12, boxShadow: "0 4px 18px rgba(0,0,0,0.06)" }}>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button onClick={openCam} style={{ flex: 1, padding: "11px 6px", background: "linear-gradient(135deg,#E86A33,#FF8A3D)", color: "#fff", border: 0, borderRadius: 12, fontWeight: "bold", fontSize: 13, whiteSpace: "nowrap" }}>📸 {T.cam}</button>
+          <label style={{ flex: 1, padding: "11px 6px", background: "#0F3D2E", color: "#fff", borderRadius: 12, fontWeight: "bold", fontSize: 13, textAlign: "center", cursor: "pointer", whiteSpace: "nowrap" }}>
+            🖼️ {T.gal}
+            <input type="file" accept="image/*" onChange={onFile} style={{ display: "none" }} />
+          </label>
+        </div>
+        {showCam && <div style={{ marginTop: 12 }}><video ref={videoRef} autoPlay playsInline muted style={{ width: "100%", borderRadius: 14, background: "#000" }} /><button onClick={takePhoto} style={{ width: "100%", padding: 11, background: "#14532d", color: "#fff", border: 0, borderRadius: 10, marginTop: 8, fontWeight: "bold", fontSize: 13 }}>{T.take}</button></div>}
+        {img && !showCam && <div style={{ marginTop: 12, position: "relative" }}><img src={img} style={{ width: "100%", borderRadius: 14, maxHeight: 340, objectFit: "cover", border: "3px solid #22c55e" }} /><span style={{ position: "absolute", top: 10, right: 10, background: "white", borderRadius: "50%", width: 48, height: 48, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, boxShadow: "0 2px 10px rgba(0,0,0,.3)" }}>🩺</span><span style={{ position: "absolute", bottom: 10, left: 10, background: "#166534", color: "white", padding: "6px 12px", borderRadius: 20, fontSize: 13, fontWeight: "bold" }}>📷 Ta photo - devant</span><button onClick={analyse} style={{ width: "100%", padding: 13, background: "linear-gradient(90deg,#E86A33,#FF8A3D)", color: "#fff", border: 0, borderRadius: 12, marginTop: 8, fontWeight: "bold", fontSize: 14 }}>{load ? T.analysing : T.analyse}</button></div>}
+        {img && <div style={{ display: "flex", gap: 8, marginTop: 10, overflowX: "auto" }}><img src={img} style={{ width: 70, height: 70, objectFit: "cover", borderRadius: 12, border: "2px solid #22c55e" }} alt="" />{myPlants.slice(0,4).map((g:any,i:number)=>(<img key={i} src={g.img} style={{ width: 70, height: 70, objectFit: "cover", borderRadius: 12, border: "2px solid #ddd" }} alt="" />))}</div>}
+        {errMsg && <div style={{ background: "#FEE2E2", color: "#991B1B", padding: 12, borderRadius: 12, marginTop: 10, fontSize: 13, lineHeight: 1.5, border: "1px solid #FCA5A5" }}>⚠️ {errMsg}</div>}
+      </div>
 
-      {page === "diag" ? (
-        <main style={{ position: "relative", zIndex: 2, maxWidth: 640, margin: "0 auto", padding: "10px 18px" }}>
-          <h1 style={{ textAlign: "center", color: "#14532d", fontSize: 28 }}>{lang === "fr" ? "Diagnostique ta plante avec l'AI" : "شخص نبتتك بالذكاء الاصطناعي"}</h1>
-          <p style={{ textAlign: "center", color: "#4b5563" }}>{lang === "fr" ? "Prends une photo, l'AI te dit le nom, la santé et le traitement." : "صور نبتتك، والذكاء الاصطناعي غادي يقوليك السمية والصحة والعلاج."}</p>
-          <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={onFile} style={{ display: "none" }} />
-          <button onClick={() => fileRef.current?.click()} style={{ width: "100%", padding: 16, background: "#22c55e", color: "white", border: "none", borderRadius: 16, fontSize: 18, fontWeight: "bold", cursor: "pointer" }}>{lang === "fr" ? "📷 Prendre une photo / Choisir une photo" : "📷 صور أو اختار تصويرة"}</button>
-          {image && (<img src={image} alt="plante" style={{ width: "100%", borderRadius: 16, marginTop: 14, maxHeight: 380, objectFit: "cover" }} />)}
-          {loading && (<p style={{ textAlign: "center", marginTop: 14 }}>⏳ {lang === "fr" ? "L'AI analyse..." : "الذكاء الاصطناعي كيحلل..."}</p>)}
-          {errMsg && (<p style={{ background: "#fef2f2", color: "#b91c1c", padding: 12, borderRadius: 12, marginTop: 12 }}>{errMsg} - {lang === "fr" ? "Réessaie dans quelques secondes" : "عاود من بعد شوية"}</p>)}
-          {result && (<div style={{ background: "white", borderRadius: 16, padding: 16, marginTop: 14, boxShadow: "0 4px 20px rgba(0,0,0,.08)" }}>
-            <h2>🌿 {result.name}</h2><p style={{ color: "#6b7280" }}><i>{result.scientific}</i></p>
-            <p><b>{lang === "fr" ? "Santé :" : "الصحة :"} {result.health}%</b></p>
-            <div style={{ height: 10, background: "#e5e7eb", borderRadius: 10, overflow: "hidden" }}><div style={{ width: `${result.health}%`, height: "100%", background: result.health > 70 ? "#22c55e" : result.health > 40 ? "#f59e0b" : "#ef4444" }} /></div>
-            <h3>{lang === "fr" ? "Problèmes" : "المشاكل"}</h3><ul>{result.problems?.map((p, i) => <li key={i}>{p}</li>)}</ul>
-            <h3>{lang === "fr" ? "Solution" : "الحل"}</h3><p>{result.solution}</p>
-            <h3>{lang === "fr" ? "Arrosage" : "السقي"}</h3><p>{result.watering}</p>
-            <button onClick={addToGarden} style={{ width: "100%", padding: 12, background: "#166534", color: "white", border: "none", borderRadius: 12, cursor: "pointer", fontWeight: "bold" }}>{lang === "fr" ? "➕ Ajouter à Mon jardin" : "➕ زيدها فحديقتي"}</button>
-          </div>)}
-        </main>
-      ) : (
-        <main style={{ position: "relative", zIndex: 2, maxWidth: 640, margin: "0 auto", padding: "10px 18px" }}>
-          <h1 style={{ textAlign: "center", color: "#14532d" }}>🌱 {lang === "fr" ? "Mon jardin" : "حديقتي"}</h1>
-          {garden.length === 0 && <p style={{ textAlign: "center" }}>{lang === "fr" ? "Ton jardin est vide. Ajoute une plante depuis le Diagnostic." : "حديقتك خاوية. زيد نبتة من التشخيص."}</p>}
-          {garden.map(p => (<div key={p.id} style={{ background: "white", borderRadius: 16, padding: 12, marginBottom: 12, display: "flex", gap: 12 }}>
-            <img src={p.image} style={{ width: 90, height: 90, objectFit: "cover", borderRadius: 12 }} alt="" />
-            <div style={{ flex: 1 }}><b>{p.name}</b><br /><small>{p.date} • {lang === "fr" ? "Santé" : "الصحة"} {p.health}% • {p.stage}</small><br /><small>{lang === "fr" ? "Dernier arrosage :" : "آخر سقي :"} {p.lastWater}</small><br />
-              <button onClick={() => waterPlant(p.id)} style={{ marginTop: 6, marginRight: 6, background: "#22c55e", color: "white", border: "none", borderRadius: 8, padding: "6px 10px", cursor: "pointer" }}>💧 {lang === "fr" ? "Arroser" : "سقي"}</button>
-              <button onClick={() => removePlant(p.id)} style={{ background: "#fee2e2", border: "none", borderRadius: 8, padding: "6px 10px", cursor: "pointer" }}>🗑️</button>
+      {res && <div style={{ background: "#fff", padding: 16, borderRadius: 18, marginTop: 12, border: "2px solid #dcfce7" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ width: 82, height: 82, borderRadius: "50%", background: `conic-gradient(#22c55e ${res.health * 3.6}deg, #eee 0deg)`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <div style={{ width: 62, height: 62, background: "#fff", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: 18 }}>{res.health}%</div>
+          </div>
+          <div><h2 style={{ margin: "2px 0", fontSize: 19 }}>🌱 {res.name}</h2><p style={{ margin: 0, fontSize: 12, color: "#666" }}>{res.scientific}</p></div>
+        </div>
+        <p style={{ marginTop: 10 }}><b>{T.health}:</b> {res.health}% - {res.disease}</p>
+        <p>💧 <b>{T.watering}:</b> {res.watering}</p><p>☀️ <b>{T.light}:</b> {res.light}</p><p>🌍 <b>{T.soil}:</b> {res.soil}</p><p>💊 <b>{T.treat}:</b> {res.treatment}</p>
+        <p style={{ textAlign: "center", fontSize: 12, color: "#16a34a", fontWeight: "bold", marginTop: 8 }}>✅ {lang==="ar" ? "تحطات بوحدها فـ حديقتي" : "Ajoutée automatiquement à Mon jardin"}</p>
+      </div>}
+      </>}
+
+      {page === "garden" && <>
+      <div className="shineGarden" style={{ padding: 22, borderRadius: 22, textAlign: "center", marginTop: 10 }}>
+        <div className="logo" style={{ fontSize: 62, background: "#fff", width: 92, height: 92, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "auto", boxShadow: "0 8px 20px rgba(0,0,0,0.25)" }}>🌿</div>
+        <h1 style={{ margin: "10px 0 5px 0", fontSize: 26 }}>{T.gardenTitle}</h1>
+        <p style={{ margin: 0, fontSize: 14 }}>{T.gardenSub}</p>
+        <div style={{ marginTop: 10, display: "flex", justifyContent: "center", gap: 8 }}>
+          <span style={{ background: "rgba(255,255,255,0.25)", padding: "5px 10px", borderRadius: 20, fontSize: 12 }}>🪴 {T.gardenBadge1}</span>
+          <span style={{ background: "rgba(255,255,255,0.25)", padding: "5px 10px", borderRadius: 20, fontSize: 12 }}>💧 {T.gardenBadge2}</span>
+        </div>
+      </div>
+
+      <div style={{ marginTop: 12 }}>
+        {[...myPlants, ...T.plants].map((p: any, i: number) => (
+          <div key={i} style={{ background: "#fff", padding: 12, borderRadius: 18, marginBottom: 10, display: "flex", gap: 12, alignItems: "center", boxShadow: "0 4px 18px rgba(0,0,0,0.06)", border: "1px solid #BBF7D0" }}>
+            <img src={p.img} alt={p.name} style={{ width: 85, height: 85, borderRadius: 14, objectFit: "cover", flexShrink: 0 }} />
+            <div style={{ flex: 1 }}>
+              <b style={{ fontSize: 15, color: "#0F3D2E" }}>{p.name}</b>
+              <div style={{ marginTop: 6 }}><span style={{ background: p.status === "Alerte" ? "#FEE2E2" : "#FEF3C7", color: p.status === "Alerte" ? "#991B1B" : "#92400E", padding: "4px 10px", borderRadius: 20, fontSize: 12, fontWeight: "bold" }}>{lang === "ar" ? p.statusAr : p.status}</span></div>
+              <p style={{ margin: "6px 0 4px 0", fontSize: 13, color: "#1D4ED8", fontWeight: "bold" }}>💧 {lang === "ar" ? p.waterAr : p.water}</p>
+              <p style={{ margin: "2px 0", fontSize: 12, color: "#666" }}>🌱 {lang === "ar" ? p.growthLabel : p.growthLabelFr} - {p.growth}%</p>
+              <div style={{ height: 7, background: "#E5E7EB", borderRadius: 10, marginTop: 4 }}><div style={{ width: `${p.growth}%`, height: "100%", background: "linear-gradient(90deg,#22c55e,#0F3D2E)", borderRadius: 10 }} /></div>
             </div>
-          </div>))}
-        </main>
-      )}
+          </div>
+        ))}
+      </div>
 
-      <nav style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: "white", display: "flex", borderTop: "1px solid #e5e7eb", zIndex: 10 }}>
-        <button onClick={() => setPage("diag")} style={{ flex: 1, padding: 12, border: "none", background: page === "diag" ? "#dcfce7" : "white", cursor: "pointer", fontWeight: "bold", color: "#166534" }}>🔍<br />{lang === "fr" ? "Diagnostic" : "التشخيص"}</button>
-        <button onClick={() => setPage("jardin")} style={{ flex: 1, padding: 12, border: "none", background: page === "jardin" ? "#dcfce7" : "white", cursor: "pointer", fontWeight: "bold", color: "#166534" }}>🌱<br />{lang === "fr" ? "Mon jardin" : "حديقتي"}</button>
-      </nav>
-    </div>
+      <div style={{ background: "linear-gradient(135deg,#FEF3C7,#FFF8E7)", padding: 14, borderRadius: 14, marginTop: 4, borderRight: lang === "ar" ? "4px solid #22c55e" : "none", borderLeft: lang === "fr" ? "4px solid #22c55e" : "none" }}>
+        <b style={{ fontSize: 14 }}>💡 {T.tipTitle}</b>
+        <p style={{ margin: "6px 0 0 0", fontSize: 13, lineHeight: 1.6 }}>{T.tip}</p>
+      </div>
+      </>}
+
+      <p style={{ textAlign: "center", fontSize: 12, color: "#888", marginTop: 12 }}>{T.made}</p>
+      </div>
+
+      <button onClick={() => setShowTeam(true)} className="iBtn" style={{ position: "fixed", bottom: 88, right: 16, zIndex: 90, width: 44, height: 44, minWidth: 44, minHeight: 44, borderRadius: "50%", background: "#ffffff", color: "#0F3D2E", border: "2px solid #FFD700", fontSize: 22, fontWeight: "900", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", lineHeight: "1", padding: 0, whiteSpace: "nowrap", overflow: "hidden", flexShrink: 0 }}>i</button>
+
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 80, background: "#fff", borderTop: "1px solid #eee", padding: "10px 12px", display: "flex", gap: 10, boxShadow: "0 -2px 12px rgba(0,0,0,0.08)" }}>
+        <button onClick={() => setPage("home")} style={{ flex: 1, padding: 12, borderRadius: 14, border: "none", background: page === "home" ? "linear-gradient(135deg,#0F3D2E,#1a7a4a)" : "#F3F4F6", color: page === "home" ? "#fff" : "#0F3D2E", fontWeight: "bold", fontSize: 14, cursor: "pointer" }}>🩺 {T.navHome}</button>
+        <button onClick={() => setPage("garden")} style={{ flex: 1, padding: 12, borderRadius: 14, border: "none", background: page === "garden" ? "linear-gradient(135deg,#E86A33,#FF8A3D)" : "#F3F4F6", color: page === "garden" ? "#fff" : "#0F3D2E", fontWeight: "bold", fontSize: 14, cursor: "pointer" }}>🌿 {T.navGarden}</button>
+      </div>
+
+      {showTeam && <div onClick={() => setShowTeam(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 20, overflowY: "auto" }}>
+        <div onClick={e => e.stopPropagation()} style={{ background: "#fff", width: "100%", maxWidth: 400, borderRadius: 16, padding: 20, textAlign: "center", maxHeight: "90vh", overflowY: "auto" }}>
+          <h3 style={{ margin: "0 0 12px 0" }}>{T.teamTitle}</h3>
+          <p style={{ color: "#666", fontSize: 13, margin: "0 0 12px 0" }}>{T.members}</p>
+          <div style={{ background: "#f9f9f9", borderRadius: 12, padding: 12, textAlign: "right" }}>
+            <p style={{ margin: "8px 0", fontWeight: "bold" }}>1. Abdeladim Zouhair</p>
+            <p style={{ margin: "8px 0" }}>2. Hafsa Abdelmoumen</p>
+            <p style={{ margin: "8px 0" }}>3. Arwa Akoujim</p>
+            <p style={{ margin: "8px 0" }}>4. Fatima Zahra El Maachi</p>
+          </div>
+          <p style={{ fontWeight: "bold", marginTop: 12, fontSize: 14 }}>🏫 {T.school}</p>
+          <div style={{ background: "#fff", border: "1px solid #dcfce7", borderRadius: 12, padding: 12, marginTop: 12, textAlign: "left" }}>
+            <h4 style={{ margin: "0 0 8px 0" }}>{T.capTitle}</h4>
+            {T.caps.map((c: string, i: number) => <p key={i} style={{ margin: "6px 0", fontSize: 13, lineHeight: 1.5 }}>{c}</p>)}
+            <div style={{ background: "linear-gradient(135deg,#FEF3C7,#FFF8E7)", padding: 10, borderRadius: 10, marginTop: 10 }}>
+              <b style={{ fontSize: 13 }}>💡 {T.tipTitle}</b>
+              <p style={{ margin: "6px 0 0 0", fontSize: 12, lineHeight: 1.6 }}>{T.tip}</p>
+            </div>
+          </div>
+          <button onClick={() => setShowTeam(false)} style={{ marginTop: 12, padding: "9px 18px", borderRadius: 10, border: "1px solid #ddd", background: "#fff", fontWeight: "bold" }}>{T.close}</button>
+        </div>
+      </div>}
+    </main>
   );
 }
