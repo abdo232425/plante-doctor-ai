@@ -22,20 +22,14 @@ export default function Home() {
     aiBadge: "AI دقيق", camBadge: "كاميرا مباشرة",
     health: "الصحة", disease: "المرض", watering: "السقي", light: "الضوء", soil: "التربة", treat: "العلاج", sci: "الاسم العلمي",
     capTitle: "شنو كيعرف يدير التطبيق؟", tipTitle: "نصيحة اليوم", tip: "ما تسقيش النبتة بزاف، خلي التربة تنشف شوية عاد سقيها، و حطها فبلاصة فيها الضو.",
-    gardenTitle: "حديقتي", gardenSub: "تتبع النمو و السقي ديال نباتاتك",
-    gardenBadge1: "6 نباتات", gardenBadge2: "متابعة حية",
+    gardenTitle: "حديقتي", gardenSub: "غير النباتات لي حللتيها نيت - ما كاين والو مزيف",
+    gardenBadge1: "نباتاتي فقط", gardenBadge2: "متابعة حية",
     teamTitle: "فريق البحث", school: "ثانوية عبدالله بن ياسين - إنزكان، أيت ملول", made: "صُنع بحب في المغرب",
     members: "أعضاء الفريق - 4 أشخاص", close: "سد",
     navHome: "تشخيص", navGarden: "حديقتي",
     caps: ["📸 تحليل أي نبتة من التصويرة بـ AI الدقيق","🌱 يعطيك اسم النبتة الحقيقي و الاسم العلمي","🩺 تشخيص دقيق للمرض و الصحة","💧 تتبع السقي و مراحل النمو","🌍 نصائح الضوء و التربة و العلاج","🇲🇦🇫🇷 عربية كاملة أو فرنسية كاملة"],
-    plants: [
-      { name: "Coléus (Coleus)", img: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400", status: "À surveiller", statusAr: "راقبها", water: "Arrosage dans 4 j", waterAr: "السقي بعد 4 أيام", growth: 65, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" },
-      { name: "Olivier", img: "https://images.unsplash.com/photo-1445264718234-a623be589d37?w=400", status: "À surveiller", statusAr: "راقبها", water: "Arrosage dans 4 j", waterAr: "السقي بعد 4 أيام", growth: 80, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" },
-      { name: "Vigne (Vitis vinifera)", img: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=400", status: "Alerte", statusAr: "خطر", water: "Arrosage dans 4 j", waterAr: "السقي بعد 4 أيام", growth: 45, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" },
-      { name: "Poirier", img: "https://images.unsplash.com/photo-1470003757653-a6d8d5d7d5a8?w=400", status: "À surveiller", statusAr: "راقبها", water: "Arrosage dans 4 j", waterAr: "السقي بعد 4 أيام", growth: 70, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" },
-      { name: "Pomme de terre (Solanum tuberosum)", img: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=400", status: "Alerte", statusAr: "خطر", water: "Arrosage dans 3 j", waterAr: "السقي بعد 3 أيام", growth: 35, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" },
-      { name: "Olivier", img: "https://images.unsplash.com/photo-1470058869958-2a77ade41c02?w=400", status: "À surveiller", statusAr: "راقبها", water: "Arrosage dans 2 j", waterAr: "السقي بعد يومين", growth: 90, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" },
-    ]
+    plants: [] as any[],
+    emptyGarden: "حديقتك خاوية. صور شي نبتة و حللها، غادي تبان هنا بوحدها."
   } : {
     title: "Plante Doctor", sub: "Prends ta plante en photo, le vrai AI la diagnostique avec précision",
     cam: "Ouvrir Caméra", gal: "Galerie", take: "Prendre photo",
@@ -43,20 +37,14 @@ export default function Home() {
     aiBadge: "AI précis", camBadge: "Caméra en direct",
     health: "Santé", disease: "Maladie", watering: "Arrosage", light: "Lumière", soil: "Sol", treat: "Traitement", sci: "Nom scientifique",
     capTitle: "Que peut faire l'application ?", tipTitle: "Conseil du jour", tip: "Ne pas trop arroser ta plante, laisse sécher la terre un peu avant de l'arroser, et mets-la à la lumière.",
-    gardenTitle: "Mon jardin", gardenSub: "Suivi de la croissance et de l'arrosage de tes plantes",
-    gardenBadge1: "6 plantes", gardenBadge2: "Suivi en direct",
+    gardenTitle: "Mon jardin", gardenSub: "Uniquement les plantes que TU as analysées - rien de faux",
+    gardenBadge1: "Mes plantes", gardenBadge2: "Suivi en direct",
     teamTitle: "Équipe de Recherche", school: "Lycée Abdellah Ben Yassine - Inezgane, Aït Melloul", made: "Fait avec amour au Maroc",
     members: "Membres - 4 personnes", close: "Fermer",
     navHome: "Diagnostic", navGarden: "Mon jardin",
     caps: ["📸 Analyser n'importe quelle plante avec AI précis","🌱 Donner le vrai nom et le nom scientifique","🩺 Diagnostic précis de la maladie et de la santé","💧 Suivi de l'arrosage et des étapes de croissance","🌍 Conseils lumière, sol et traitement","🇲🇦🇫🇷 Tout en arabe ou tout en français"],
-    plants: [
-      { name: "Coléus (Coleus)", img: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400", status: "À surveiller", statusAr: "راقبها", water: "Arrosage dans 4 j", waterAr: "السقي بعد 4 أيام", growth: 65, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" },
-      { name: "Olivier", img: "https://images.unsplash.com/photo-1445264718234-a623be589d37?w=400", status: "À surveiller", statusAr: "راقبها", water: "Arrosage dans 4 j", waterAr: "السقي بعد 4 أيام", growth: 80, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" },
-      { name: "Vigne (Vitis vinifera)", img: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=400", status: "Alerte", statusAr: "خطر", water: "Arrosage dans 4 j", waterAr: "السقي بعد 4 أيام", growth: 45, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" },
-      { name: "Poirier", img: "https://images.unsplash.com/photo-1470003757653-a6d8d5d7d5a8?w=400", status: "À surveiller", statusAr: "راقبها", water: "Arrosage dans 4 j", waterAr: "السقي بعد 4 أيام", growth: 70, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" },
-      { name: "Pomme de terre (Solanum tuberosum)", img: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=400", status: "Alerte", statusAr: "خطر", water: "Arrosage dans 3 j", waterAr: "السقي بعد 3 أيام", growth: 35, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" },
-      { name: "Olivier", img: "https://images.unsplash.com/photo-1470058869958-2a77ade41c02?w=400", status: "À surveiller", statusAr: "راقبها", water: "Arrosage dans 2 j", waterAr: "السقي بعد يومين", growth: 90, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" },
-    ]
+    plants: [] as any[],
+    emptyGarden: "Ton jardin est vide. Prends une plante en photo et analyse-la, elle apparaîtra ici toute seule."
   };
 
   const openCam = async () => {
@@ -73,13 +61,12 @@ export default function Home() {
     const r = new FileReader(); r.onload = () => { setImg(r.result as string); setShowCam(false); }; r.readAsDataURL(f); e.target.value = "";
   };
 
-  // ===== AI - أدق نسخة - temperature 0 = ما كيخترعش =====
   const callAI = async (model: string, base64: string, prompt: string, key: string) => {
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: "image/jpeg", data: base64 } }] }],
-        generationConfig: { temperature: 0, topP: 0.1, topK: 1, maxOutputTokens: 800 }
+        generationConfig: { temperature: 0, topP: 0.1, topK: 1, maxOutputTokens: 1000 }
       })
     });
     return await r.json();
@@ -87,24 +74,21 @@ export default function Home() {
 
   const analyseAI = async (image: string) => {
     const key = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-    if (!key) {
-      setErrMsg(lang === "ar" ? "المفتاح ما كاينش في Vercel" : "Clé manquante dans Vercel");
-      return null;
-    }
+    if (!key) { setErrMsg(lang === "ar" ? "المفتاح ما كاينش في Vercel" : "Clé manquante dans Vercel"); return null; }
     const base64 = image.split(",")[1];
     const prompt = lang === "ar"
-      ? `أنت طبيب نباتات خبير ودقيق جدا. مهمتك: انظر للصورة بعناية شديدة.
-      الخطوة 1: صف ما تراه فعلا: لون الأوراق، شكل الورقة، شكل الزهرة، الساق.
-      الخطوة 2: بناء على ما رأيته فقط، حدد اسم النبتة. لا تخمن. لا تقل مونستيرا أبدا إلا إذا رأيت أوراقا مثقوبة كبيرة فعلا.
-      الخطوة 3: إذا لم تكن متأكدا، قل "نبتة غير محددة" في الاسم.
-      أعد فقط JSON: {"name":"الاسم الحقيقي بالعربية","scientific":"الاسم العلمي","health": رقم 0-100 حسب ما تراه فعلا,"disease":"المرض الظاهر فعلا بالعربية","watering":"السقي بالعربية","light":"الضوء بالعربية","soil":"التربة بالعربية","treatment":"العلاج بالعربية"}`
-      : `Tu es un docteur des plantes expert et très précis. Ta mission: regarde la photo avec une extrême attention.
-      Étape 1: Décris ce que tu vois VRAIMENT: couleur des feuilles, forme de la feuille, forme de la fleur, tige.
-      Étape 2: D'après ce que tu as vu UNIQUEMENT, identifie la plante. Ne devine pas. Ne dis JAMAIS Monstera sauf si tu vois vraiment de grandes feuilles trouées.
-      Étape 3: Si tu n'es pas sûr, dis "Plante non identifiée" dans le nom.
-      Retourne UNIQUEMENT ce JSON: {"name":"vrai nom en français","scientific":"vrai nom scientifique","health": nombre 0-100 selon ce que tu vois vraiment,"disease":"maladie visible vraiment en français","watering":"arrosage en français","light":"lumière en français","soil":"sol en français","treatment":"traitement en français"}`;
-
-    for (const model of ["gemini-3.5-flash-lite", "gemini-3-flash", "gemini-3.8-flash"]) {
+      ? `أنت عالم نباتات خبير يعرف جميع أنواع النباتات في العالم: أشجار، نباتات الزينة، نباتات طبية وعطرية، صبار، نباتات الفواكه، نباتات الحبوب، نباتات داخلية وخارجية، وكل أنواع النباتات. وتعرف جميع أمراض النباتات: فطريات، بكتيريا، فيروسات، حشرات، نقص عناصر، جفاف، زيادة سقي.
+      القاعدة الذهبية: ممنوع تخمن الاسم. إذا عرفت النبتة بـ 100% قل اسمها الحقيقي. إذا لم تكن متأكدا، لا تكتب أي اسم غالط، اكتب "نبتة غير محددة" في الاسم واترك الاسم العلمي فارغا.
+      المهم جدا: حتى إذا لم تعرف الاسم، حلل المرض والسقي والعلاج بصحيح 100% من ما تراه فعلا في الصورة: لون الأوراق، بقع، اصفرار، ذبول، جفاف، حشرات، شكل الورقة، الساق.
+      لا تقل مونستيرا إلا إذا رأيت أوراقا مثقوبة كبيرة فعلا. لا تقل أفوكا إلا إذا رأيت شجرة بأوراق كبيرة ملساء. لا تقل نعناع إلا إذا رأيت ساقا مربعة وأوراقا متقابلة. لا تقل توت إلا إذا رأيت نبتة زاحفة بثلاث وريقات وثمرة حمراء. لا تقل حريقة إلا إذا رأيت شعيرات لاسعة.
+      أعد فقط JSON: {"name":"الاسم الحقيقي بالعربية أو نبتة غير محددة","scientific":"الاسم العلمي أو فارغ","health": رقم 0-100 حسب ما تراه فعلا,"disease":"المرض الظاهر فعلا بالعربية - حلله من الأعراض","watering":"السقي بالعربية - صحيح حسب المرض","light":"الضوء بالعربية","soil":"التربة بالعربية","treatment":"العلاج بالعربية - خطوة بخطوة حسب المرض"}`
+      : `Tu es un botaniste expert qui connait TOUS les types de plantes du monde: arbres, plantes d'ornement, plantes medicinales et aromatiques, cactus, plantes a fruits, plantes a cereales, plantes d'interieur et d'exterieur, et tous les types de plantes. Et tu connais TOUTES les maladies des plantes: champignons, bacteries, virus, insectes, carences, secheresse, exces d'arrosage.
+      Regle d'or: INTERDIT de deviner le nom. Si tu connais la plante a 100%, dis son vrai nom. Si tu n'es pas sur, n'ecris AUCUN faux nom, ecris "Plante non identifiée" dans le nom et laisse le nom scientifique vide.
+      Tres important: meme si tu ne connais pas le nom, analyse la maladie, l'arrosage et le traitement a 100% juste d'apres ce que tu vois VRAIMENT dans la photo: couleur des feuilles, taches, jaunissement, fletrissement, secheresse, insectes, forme de la feuille, tige.
+      Ne dis JAMAIS Monstera sauf si tu vois vraiment de grandes feuilles trouees. Ne dis JAMAIS Avocat sauf si tu vois un arbre a grandes feuilles lisses. Ne dis JAMAIS Menthe sauf si tu vois tige carree et feuilles opposees. Ne dis JAMAIS Fraise sauf si tu vois plante rampante a 3 folioles et fruit rouge. Ne dis JAMAIS Ortie sauf si tu vois poils urticants.
+      Retourne UNIQUEMENT ce JSON: {"name":"vrai nom en français ou Plante non identifiée","scientific":"vrai nom scientifique ou vide","health": nombre 0-100 selon ce que tu vois vraiment,"disease":"maladie visible vraiment en français - analyse les symptomes","watering":"arrosage en français - juste selon la maladie","light":"lumière en français","soil":"sol en français","treatment":"traitement en français - etape par etape selon la maladie"}`;
+    // UN SEUL MODELE RAPIDE - pas 3 essais = pas de retard
+    for (const model of ["gemini-3-flash"]) {
       try {
         const j = await callAI(model, base64, prompt, key);
         if (j.error) { setErrMsg(`AI: ${j.error.message}`); continue; }
@@ -114,7 +98,8 @@ export default function Home() {
         const end = txt.lastIndexOf("}") + 1;
         if (start === -1 || end === 0) continue;
         const parsed = JSON.parse(txt.slice(start, end));
-        if (!parsed.name) continue;
+        if (!parsed.name) parsed.name = lang === "ar" ? "نبتة غير محددة" : "Plante non identifiée";
+        if (!parsed.scientific) parsed.scientific = "";
         if (typeof parsed.health !== "number") parsed.health = 75;
         if (parsed.health < 0) parsed.health = 0;
         if (parsed.health > 100) parsed.health = 100;
@@ -131,8 +116,8 @@ export default function Home() {
     const ai = await analyseAI(img);
     if (ai) {
       setRes(ai);
-      // AUTO : تحط بوحدها في Mon jardin
-      const newPlant = { name: ai.name + " (" + ai.scientific + ")", img: img, status: ai.health > 70 ? "À surveiller" : "Alerte", statusAr: ai.health > 70 ? "راقبها" : "خطر", water: ai.watering, waterAr: ai.watering, growth: ai.health, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" };
+      const displayName = ai.scientific ? ai.name + " (" + ai.scientific + ")" : ai.name;
+      const newPlant = { name: displayName, img: img, status: ai.health > 70 ? "À surveiller" : "Alerte", statusAr: ai.health > 70 ? "راقبها" : "خطر", water: ai.watering, waterAr: ai.watering, growth: ai.health, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" };
       setMyPlants((prev) => [newPlant, ...prev]);
       setConfetti(true); setTimeout(()=>setConfetti(false), 2000);
     }
@@ -157,7 +142,6 @@ export default function Home() {
         .falling{position:absolute; top:0; font-size:26px; animation:fall linear infinite; opacity:0.7; pointer-events:none; z-index:0}
         .iBtn{animation:iMove 2s infinite !important}
       `}</style>
-
       <span className="falling" style={{ left: "5%", animationDuration: "7s" }}>🌿</span>
       <span className="falling" style={{ left: "18%", animationDuration: "9s", animationDelay: "1s" }}>🍃</span>
       <span className="falling" style={{ left: "32%", animationDuration: "8s", animationDelay: "2s" }}>🌱</span>
@@ -165,9 +149,7 @@ export default function Home() {
       <span className="falling" style={{ left: "62%", animationDuration: "7s", animationDelay: "1.5s" }}>🌿</span>
       <span className="falling" style={{ left: "78%", animationDuration: "9s", animationDelay: "0.2s" }}>🍃</span>
       <span className="falling" style={{ left: "90%", animationDuration: "8s", animationDelay: "2.5s" }}>🌱</span>
-
       {confetti && <div style={{ position: "absolute", top: 0, left: 0, right: 0, textAlign: "center", zIndex: 99, pointerEvents: "none" }}><span className="confetti" style={{ left: "15%" }}>🌸</span><span className="confetti" style={{ left: "50%" }}>⭐</span><span className="confetti" style={{ left: "80%" }}>✨</span></div>}
-
       <div style={{ position: "relative", zIndex: 1 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <span className="topLogo" style={{ fontWeight: "900", fontSize: 22, color: "#0F3D2E" }}>
@@ -176,7 +158,6 @@ export default function Home() {
         </span>
         <button onClick={() => setLang(lang==="ar"?"fr":"ar")} style={{ padding: "6px 10px", border: "none", background: "transparent", fontWeight: "bold", fontSize: 13, color: "#0F3D2E", cursor: "pointer" }}>{lang==="ar" ? "🇫🇷 Français" : "🇲🇦 العربية"}</button>
       </div>
-
       {page === "home" && <>
       <div className="shine" style={{ padding: 22, borderRadius: 22, textAlign: "center", marginTop: 10 }}>
         <div className="logo" style={{ fontSize: 62, background: "#fff", width: 92, height: 92, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "auto", boxShadow: "0 8px 20px rgba(0,0,0,0.25)" }}>🩺</div>
@@ -187,7 +168,6 @@ export default function Home() {
           <span style={{ background: "rgba(255,255,255,0.25)", padding: "5px 10px", borderRadius: 20, fontSize: 12 }}>📸 {T.camBadge}</span>
         </div>
       </div>
-
       <div style={{ background: "#fff", padding: 14, borderRadius: 18, marginTop: 12, boxShadow: "0 4px 18px rgba(0,0,0,0.06)" }}>
         <div style={{ display: "flex", gap: 8 }}>
           <button onClick={openCam} style={{ flex: 1, padding: "11px 6px", background: "linear-gradient(135deg,#E86A33,#FF8A3D)", color: "#fff", border: 0, borderRadius: 12, fontWeight: "bold", fontSize: 13, whiteSpace: "nowrap" }}>📸 {T.cam}</button>
@@ -201,33 +181,31 @@ export default function Home() {
         {img && <div style={{ display: "flex", gap: 8, marginTop: 10, overflowX: "auto" }}><img src={img} style={{ width: 70, height: 70, objectFit: "cover", borderRadius: 12, border: "2px solid #22c55e" }} alt="" />{myPlants.slice(0,4).map((g:any,i:number)=>(<img key={i} src={g.img} style={{ width: 70, height: 70, objectFit: "cover", borderRadius: 12, border: "2px solid #ddd" }} alt="" />))}</div>}
         {errMsg && <div style={{ background: "#FEE2E2", color: "#991B1B", padding: 12, borderRadius: 12, marginTop: 10, fontSize: 13, lineHeight: 1.5, border: "1px solid #FCA5A5" }}>⚠️ {errMsg}</div>}
       </div>
-
       {res && <div style={{ background: "#fff", padding: 16, borderRadius: 18, marginTop: 12, border: "2px solid #dcfce7" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ width: 82, height: 82, borderRadius: "50%", background: `conic-gradient(#22c55e ${res.health * 3.6}deg, #eee 0deg)`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
             <div style={{ width: 62, height: 62, background: "#fff", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: 18 }}>{res.health}%</div>
           </div>
-          <div><h2 style={{ margin: "2px 0", fontSize: 19 }}>🌱 {res.name}</h2><p style={{ margin: 0, fontSize: 12, color: "#666" }}>{res.scientific}</p></div>
+          <div><h2 style={{ margin: "2px 0", fontSize: 19 }}>🌱 {res.name}</h2>{res.scientific ? <p style={{ margin: 0, fontSize: 12, color: "#666" }}>{res.scientific}</p> : <p style={{ margin: 0, fontSize: 12, color: "#999" }}>{lang==="ar" ? "الاسم غير محدد - ولكن تحليل المرض صحيح" : "Nom non identifié - mais analyse maladie juste"}</p>}</div>
         </div>
         <p style={{ marginTop: 10 }}><b>{T.health}:</b> {res.health}% - {res.disease}</p>
         <p>💧 <b>{T.watering}:</b> {res.watering}</p><p>☀️ <b>{T.light}:</b> {res.light}</p><p>🌍 <b>{T.soil}:</b> {res.soil}</p><p>💊 <b>{T.treat}:</b> {res.treatment}</p>
         <p style={{ textAlign: "center", fontSize: 12, color: "#16a34a", fontWeight: "bold", marginTop: 8 }}>✅ {lang==="ar" ? "تحطات بوحدها فـ حديقتي" : "Ajoutée automatiquement à Mon jardin"}</p>
       </div>}
       </>}
-
       {page === "garden" && <>
       <div className="shineGarden" style={{ padding: 22, borderRadius: 22, textAlign: "center", marginTop: 10 }}>
         <div className="logo" style={{ fontSize: 62, background: "#fff", width: 92, height: 92, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "auto", boxShadow: "0 8px 20px rgba(0,0,0,0.25)" }}>🌿</div>
         <h1 style={{ margin: "10px 0 5px 0", fontSize: 26 }}>{T.gardenTitle}</h1>
         <p style={{ margin: 0, fontSize: 14 }}>{T.gardenSub}</p>
         <div style={{ marginTop: 10, display: "flex", justifyContent: "center", gap: 8 }}>
-          <span style={{ background: "rgba(255,255,255,0.25)", padding: "5px 10px", borderRadius: 20, fontSize: 12 }}>🪴 {T.gardenBadge1}</span>
+          <span style={{ background: "rgba(255,255,255,0.25)", padding: "5px 10px", borderRadius: 20, fontSize: 12 }}>🪴 {myPlants.length} {T.gardenBadge1}</span>
           <span style={{ background: "rgba(255,255,255,0.25)", padding: "5px 10px", borderRadius: 20, fontSize: 12 }}>💧 {T.gardenBadge2}</span>
         </div>
       </div>
-
       <div style={{ marginTop: 12 }}>
-        {[...myPlants, ...T.plants].map((p: any, i: number) => (
+        {myPlants.length === 0 && <div style={{ background: "#fff", padding: 20, borderRadius: 18, textAlign: "center", color: "#666" }}>🌱<br />{(T as any).emptyGarden}</div>}
+        {myPlants.map((p: any, i: number) => (
           <div key={i} style={{ background: "#fff", padding: 12, borderRadius: 18, marginBottom: 10, display: "flex", gap: 12, alignItems: "center", boxShadow: "0 4px 18px rgba(0,0,0,0.06)", border: "1px solid #BBF7D0" }}>
             <img src={p.img} alt={p.name} style={{ width: 85, height: 85, borderRadius: 14, objectFit: "cover", flexShrink: 0 }} />
             <div style={{ flex: 1 }}>
@@ -240,23 +218,17 @@ export default function Home() {
           </div>
         ))}
       </div>
-
       <div style={{ background: "linear-gradient(135deg,#FEF3C7,#FFF8E7)", padding: 14, borderRadius: 14, marginTop: 4, borderRight: lang === "ar" ? "4px solid #22c55e" : "none", borderLeft: lang === "fr" ? "4px solid #22c55e" : "none" }}>
         <b style={{ fontSize: 14 }}>💡 {T.tipTitle}</b>
         <p style={{ margin: "6px 0 0 0", fontSize: 13, lineHeight: 1.6 }}>{T.tip}</p>
       </div>
       </>}
-
-      {/* texte en bas supprime pour enlever espace vide */}
       </div>
-
       <button onClick={() => setShowTeam(true)} className="iBtn" style={{ position: "fixed", bottom: 88, right: 16, zIndex: 90, width: 44, height: 44, minWidth: 44, minHeight: 44, borderRadius: "50%", background: "#ffffff", color: "#0F3D2E", border: "2px solid #FFD700", fontSize: 22, fontWeight: "900", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", lineHeight: "1", padding: 0, whiteSpace: "nowrap", overflow: "hidden", flexShrink: 0 }}>i</button>
-
       <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 80, background: "#fff", borderTop: "1px solid #eee", padding: "10px 12px", display: "flex", gap: 10, boxShadow: "0 -2px 12px rgba(0,0,0,0.08)" }}>
         <button onClick={() => setPage("home")} style={{ flex: 1, padding: 12, borderRadius: 14, border: "none", background: page === "home" ? "linear-gradient(135deg,#0F3D2E,#1a7a4a)" : "#F3F4F6", color: page === "home" ? "#fff" : "#0F3D2E", fontWeight: "bold", fontSize: 14, cursor: "pointer" }}>🩺 {T.navHome}</button>
         <button onClick={() => setPage("garden")} style={{ flex: 1, padding: 12, borderRadius: 14, border: "none", background: page === "garden" ? "linear-gradient(135deg,#E86A33,#FF8A3D)" : "#F3F4F6", color: page === "garden" ? "#fff" : "#0F3D2E", fontWeight: "bold", fontSize: 14, cursor: "pointer" }}>🌿 {T.navGarden}</button>
       </div>
-
       {showTeam && <div onClick={() => setShowTeam(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 20, overflowY: "auto" }}>
         <div onClick={e => e.stopPropagation()} style={{ background: "#fff", width: "100%", maxWidth: 400, borderRadius: 16, padding: 20, textAlign: "center", maxHeight: "90vh", overflowY: "auto" }}>
           <h3 style={{ margin: "0 0 12px 0" }}>{T.teamTitle}</h3>
