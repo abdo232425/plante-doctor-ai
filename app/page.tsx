@@ -62,36 +62,95 @@ export default function Home() {
   };
 
   const callAI = async (model: string, base64: string, prompt: string, key: string) => {
-    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: "image/jpeg", data: base64 } }] }],
-        generationConfig: { temperature: 0, topP: 0.1, topK: 1, maxOutputTokens: 1000 }
-      })
-    });
-    return await r.json();
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 10000); // TEMPS LIMITE: 10 secondes max, sinon on coupe
+    try {
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+        method: "POST", headers: { "Content-Type": "application/json" }, signal: ctrl.signal,
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: "image/jpeg", data: base64 } }] }],
+          generationConfig: { temperature: 0, topP: 0.1, topK: 1, maxOutputTokens: 1000 }
+        })
+      });
+      clearTimeout(timer);
+      return await r.json();
+    } catch (e) { clearTimeout(timer); throw e; }
   };
+  // ===== CONNAISSANCE MAROC - on lui apprend toutes les plantes du Maroc =====
+  const MAROC = `TOUTES LES PLANTES DU MAROC - TU LES CONNAIS TOUTES, TOUTES LES CATEGORIES:
+  === 1. HERBES ET PLANTES SAUVAGES / NATURELLES DU MAROC ===
+  - Ortie / Hriga (Urtica dioica): feuilles fortement dentees + poils urticants. Maladies: pucerons. Arrosage: moderé, sol humide. Croissance: pousse vite au printemps, 30-120cm.
+  - Chardon / Chouk (Cynara): grandes feuilles epineuses. Maladies: oidium. Arrosage: peu d'eau. Croissance: lente, 2 ans.
+  - Mauve / Khobiza (Malva): feuilles rondes, fleurs violettes. Maladies: rouille. Arrosage: regulier. Croissance: rapide.
+  - Pissenlit: feuilles dentees, fleur jaune. Maladies: rarement. Arrosage: peu. Croissance: tres rapide.
+  - Pourpier / Rjla: tiges rampantes, feuilles charnues. Maladies: rarement. Arrosage: peu.
+  === 2. PLANTES MEDICINALES ET AROMATIQUES DU MAROC ===
+  - Menthe / Naanaa (Mentha): tige CARREE, feuilles opposees, parfum fort. Maladies: rouille orange, oidium. Arrosage: beaucoup, sol toujours humide. Croissance: tres rapide, envahissante.
+  - Romarin / Azir: aiguilles parfumees. Maladies: pourriture racines si trop d'eau. Arrosage: tres peu, sol sec. Croissance: lente.
+  - Thym / Zaatar: petites feuilles parfumees. Maladies: pourriture si trop d'eau. Arrosage: peu. Croissance: lente.
+  - Sauge / Salmia: feuilles veloutees grises. Maladies: oidium. Arrosage: peu. Croissance: moyenne.
+  - Verveine / Louiza: feuilles longues parfumees citron. Maladies: pucerons. Arrosage: regulier. Croissance: rapide en ete.
+  - Lavande / Khzama: fleurs violettes parfumees. Maladies: pourriture. Arrosage: peu. Croissance: lente.
+  - Armoise / Chih: feuilles grises ameres. Maladies: rarement. Arrosage: peu. Croissance: rapide.
+  - Absinthe: feuilles grises decoupees. Maladies: oidium. Arrosage: peu.
+  === 3. ARBRES DU MAROC ===
+  - Olivier / Zitoun (Olea): feuilles lanceolees vert-gris. Maladies: oeil de paon taches noires, mouche olive. Arrosage: peu, resistant secheresse. Croissance: tres lente, 100 ans.
+  - Oranger / Limoun (Citrus): feuilles ovales brillantes, fleurs blanches parfumees. Maladies: cochenilles, gommose. Arrosage: regulier 2x semaine. Croissance: moyenne.
+  - Citronnier: comme oranger, fruit jaune. Maladies: mineuse. Arrosage: regulier.
+  - Figuier / Karmous: grandes feuilles 5 lobes. Maladies: rouille. Arrosage: peu. Croissance: rapide.
+  - Grenadier / Roumane: fleurs rouges, fruit grenade. Maladies: pucerons. Arrosage: moderé. Croissance: moyenne.
+  - Palmier dattier / Nakhal: palmes, dattes. Maladies: charancon rouge, bayoud. Arrosage: beaucoup en ete. Croissance: tres lente.
+  - Argan (Argania spinosa - unique Maroc): arbre epineux, fruit argan. Maladies: rarement. Arrosage: tres peu. Croissance: tres lente.
+  - Cedre / Arz: grand conifere Atlas. Maladies: chenilles. Arrosage: pluie seulement. Croissance: lente.
+  - Eucalyptus: feuilles longues parfumees. Maladies: psylle. Arrosage: beaucoup. Croissance: tres rapide.
+  === 4. PLANTES D'ORNEMENT DU MAROC ===
+  - Geranium / Atarcha: feuilles rondes, fleurs rouges. Maladies: rouille. Arrosage: moderé. Croissance: rapide.
+  - Jasmin: liane, fleurs blanches parfumees. Maladies: cochenilles. Arrosage: regulier. Croissance: rapide.
+  - Bougainvillier: bractees roses/violettes. Maladies: pucerons. Arrosage: peu. Croissance: rapide.
+  - Rose / Ward: fleurs parfumees. Maladies: oidium, taches noires. Arrosage: regulier. Croissance: moyenne.
+  - Aloe Vera / Sabbar: feuilles charnues epineuses, gel. Maladies: pourriture si trop d'eau. Arrosage: tres peu. Croissance: lente.
+  - Cactus / Hindi (Opuntia): raquettes plates epines. Maladies: cochenille. Arrosage: tres peu. Croissance: lente.
+  === 5. PLANTES A FRUITS ET LEGUMES DU MAROC ===
+  - Fraise / Tout: rampante, 3 folioles, fruit rouge. Maladies: oidium poudre blanche, pourriture grise. Arrosage: regulier sans mouiller feuilles. Croissance: rapide, fruits en 2 mois.
+  - Vigne / Dalia: liane, feuilles decoupees. Maladies: mildiou, oidium. Arrosage: moderé. Croissance: rapide.
+  - Tomate / Maticha: feuilles decoupees, fruit rouge. Maladies: mildiou, cul noir. Arrosage: regulier. Croissance: rapide 2-3 mois.
+  - Pomme de terre / Batata: feuilles composees, tubercules. Maladies: mildiou, doryphore. Arrosage: regulier. Croissance: 3-4 mois.
+  - Piment / Felfla: feuilles ovales, fruit piment. Maladies: pucerons, mosaique. Arrosage: regulier. Croissance: 2-3 mois.
+  - Courgette / Graa: grandes feuilles, fruit vert. Maladies: oidium. Arrosage: beaucoup. Croissance: tres rapide.
+  === 6. CEREALES ET PLANTES DES CHAMPS DU MAROC ===
+  - Ble / Qamh: tiges hautes, epis. Maladies: rouille, septoriose. Arrosage: pluie. Croissance: 6 mois.
+  - Orge / Chair: comme ble. Maladies: oidium. Arrosage: pluie. Croissance: 5 mois.
+  - Mais / Dra: tiges hautes, epis. Maladies: pyrale. Arrosage: beaucoup. Croissance: 3-4 mois.
+  - Feve / Foul: fleurs blanches/noires, gousses. Maladies: pucerons noirs. Arrosage: moderé. Croissance: 3 mois.
+  - Pois chiche / Hommos: petites feuilles, gousses. Maladies: anthracnose. Arrosage: peu. Croissance: 3 mois.
+  === 7. PLANTES D'INTERIEUR AU MAROC ===
+  - Monstera: GRANDES feuilles TROUEES. Maladies: taches brunes si trop d'eau. Arrosage: peu, laisser secher. Croissance: rapide.
+  - Pothos: liane, feuilles coeur. Maladies: pourriture. Arrosage: peu. Croissance: tres rapide.
+  - Ficus: feuilles ovales brillantes. Maladies: chute feuilles si courant d'air. Arrosage: moderé. Croissance: lente.
+  `;
 
   const analyseAI = async (image: string) => {
     const key = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
     if (!key) { setErrMsg(lang === "ar" ? "المفتاح ما كاينش في Vercel" : "Clé manquante dans Vercel"); return null; }
     const base64 = image.split(",")[1];
     const prompt = lang === "ar"
-      ? `أنت عالم نباتات خبير يعرف جميع أنواع النباتات في العالم: أشجار، نباتات الزينة، نباتات طبية وعطرية، صبار، نباتات الفواكه، نباتات الحبوب، نباتات داخلية وخارجية، وكل أنواع النباتات. وتعرف جميع أمراض النباتات: فطريات، بكتيريا، فيروسات، حشرات، نقص عناصر، جفاف، زيادة سقي.
+      ? `أنت عالم نباتات خبير يعرف جميع أنواع النباتات في العالم، وخاصة نباتات المغرب. هذا هو علمك عن المغرب: ${MAROC}
+      أنت تعرف جميع أنواع النباتات في العالم: أشجار، نباتات الزينة، نباتات طبية وعطرية، صبار، نباتات الفواكه، نباتات الحبوب، نباتات داخلية وخارجية، وكل أنواع النباتات. وتعرف جميع أمراض النباتات: فطريات، بكتيريا، فيروسات، حشرات، نقص عناصر، جفاف، زيادة سقي.
       القاعدة الذهبية: ممنوع تخمن الاسم. إذا عرفت النبتة بـ 100% قل اسمها الحقيقي. إذا لم تكن متأكدا، لا تكتب أي اسم غالط، اكتب "نبتة غير محددة" في الاسم واترك الاسم العلمي فارغا.
       المهم جدا: حتى إذا لم تعرف الاسم، حلل المرض والسقي والعلاج بصحيح 100% من ما تراه فعلا في الصورة: لون الأوراق، بقع، اصفرار، ذبول، جفاف، حشرات، شكل الورقة، الساق.
       لا تقل مونستيرا إلا إذا رأيت أوراقا مثقوبة كبيرة فعلا. لا تقل أفوكا إلا إذا رأيت شجرة بأوراق كبيرة ملساء. لا تقل نعناع إلا إذا رأيت ساقا مربعة وأوراقا متقابلة. لا تقل توت إلا إذا رأيت نبتة زاحفة بثلاث وريقات وثمرة حمراء. لا تقل حريقة إلا إذا رأيت شعيرات لاسعة.
       أعد فقط JSON: {"name":"الاسم الحقيقي بالعربية أو نبتة غير محددة","scientific":"الاسم العلمي أو فارغ","health": رقم 0-100 حسب ما تراه فعلا,"disease":"المرض الظاهر فعلا بالعربية - حلله من الأعراض","watering":"السقي بالعربية - صحيح حسب المرض","light":"الضوء بالعربية","soil":"التربة بالعربية","treatment":"العلاج بالعربية - خطوة بخطوة حسب المرض"}`
-      : `Tu es un botaniste expert qui connait TOUS les types de plantes du monde: arbres, plantes d'ornement, plantes medicinales et aromatiques, cactus, plantes a fruits, plantes a cereales, plantes d'interieur et d'exterieur, et tous les types de plantes. Et tu connais TOUTES les maladies des plantes: champignons, bacteries, virus, insectes, carences, secheresse, exces d'arrosage.
+      : `Tu es un botaniste expert qui connait TOUS les types de plantes du monde, et surtout les plantes du MAROC. Voici ta connaissance du Maroc: ${MAROC}
+      Tu connais TOUS les types de plantes du monde: arbres, plantes d'ornement, plantes medicinales et aromatiques, cactus, plantes a fruits, plantes a cereales, plantes d'interieur et d'exterieur, et tous les types de plantes. Et tu connais TOUTES les maladies des plantes: champignons, bacteries, virus, insectes, carences, secheresse, exces d'arrosage.
       Regle d'or: INTERDIT de deviner le nom. Si tu connais la plante a 100%, dis son vrai nom. Si tu n'es pas sur, n'ecris AUCUN faux nom, ecris "Plante non identifiée" dans le nom et laisse le nom scientifique vide.
       Tres important: meme si tu ne connais pas le nom, analyse la maladie, l'arrosage et le traitement a 100% juste d'apres ce que tu vois VRAIMENT dans la photo: couleur des feuilles, taches, jaunissement, fletrissement, secheresse, insectes, forme de la feuille, tige.
       Ne dis JAMAIS Monstera sauf si tu vois vraiment de grandes feuilles trouees. Ne dis JAMAIS Avocat sauf si tu vois un arbre a grandes feuilles lisses. Ne dis JAMAIS Menthe sauf si tu vois tige carree et feuilles opposees. Ne dis JAMAIS Fraise sauf si tu vois plante rampante a 3 folioles et fruit rouge. Ne dis JAMAIS Ortie sauf si tu vois poils urticants.
       Retourne UNIQUEMENT ce JSON: {"name":"vrai nom en français ou Plante non identifiée","scientific":"vrai nom scientifique ou vide","health": nombre 0-100 selon ce que tu vois vraiment,"disease":"maladie visible vraiment en français - analyse les symptomes","watering":"arrosage en français - juste selon la maladie","light":"lumière en français","soil":"sol en français","treatment":"traitement en français - etape par etape selon la maladie"}`;
     // UN SEUL MODELE RAPIDE - pas 3 essais = pas de retard
-    for (const model of ["gemini-3-flash"]) {
+    for (const model of ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]) {
       try {
         const j = await callAI(model, base64, prompt, key);
-        if (j.error) { setErrMsg(`AI: ${j.error.message}`); continue; }
+        if (j.error) { continue; }
         let txt = j.candidates?.[0]?.content?.parts?.[0]?.text || "";
         if (!txt) continue;
         const start = txt.indexOf("{");
@@ -105,8 +164,9 @@ export default function Home() {
         if (parsed.health > 100) parsed.health = 100;
         setErrMsg("");
         return parsed;
-      } catch (e: any) { setErrMsg(`AI: ${e.message}`); continue; }
+      } catch (e: any) { continue; }
     }
+    setErrMsg(lang === "ar" ? "عاود حاول من بعد شوية" : "Réessaie dans quelques secondes");
     return null;
   };
 
@@ -125,7 +185,7 @@ export default function Home() {
   };
 
   return (
-    <main style={{ maxWidth: 680, width: "100%", margin: "auto", padding: 16, paddingBottom: 80, fontFamily: "sans-serif", minHeight: "auto", color: "#111", position: "relative", background: "#E8F5E9", overflow: "hidden", colorScheme: "light" }}>
+    <main style={{ maxWidth: 680, width: "100%", margin: "auto", padding: 16, paddingBottom: 60, fontFamily: "sans-serif", minHeight: "auto", height: "auto", color: "#111", position: "relative", background: "#fff", overflow: "visible", colorScheme: "light" }}>
       <style>{`
         @keyframes float{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
         @keyframes shine{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
@@ -177,7 +237,7 @@ export default function Home() {
           </label>
         </div>
         {showCam && <div style={{ marginTop: 12 }}><video ref={videoRef} autoPlay playsInline muted style={{ width: "100%", borderRadius: 14, background: "#000" }} /><button onClick={takePhoto} style={{ width: "100%", padding: 11, background: "#14532d", color: "#fff", border: 0, borderRadius: 10, marginTop: 8, fontWeight: "bold", fontSize: 13 }}>{T.take}</button></div>}
-        {img && !showCam && <div style={{ marginTop: 12, position: "relative" }}><img src={img} style={{ width: "100%", borderRadius: 14, maxHeight: 340, objectFit: "cover", border: "3px solid #22c55e" }} /><span style={{ position: "absolute", top: 10, right: 10, background: "white", borderRadius: "50%", width: 48, height: 48, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, boxShadow: "0 2px 10px rgba(0,0,0,.3)" }}>🩺</span><span style={{ position: "absolute", bottom: 10, left: 10, background: "#166534", color: "white", padding: "6px 12px", borderRadius: 20, fontSize: 13, fontWeight: "bold" }}>📷 Ta photo - devant</span><button onClick={analyse} style={{ width: "100%", padding: 13, background: "linear-gradient(90deg,#E86A33,#FF8A3D)", color: "#fff", border: 0, borderRadius: 12, marginTop: 8, fontWeight: "bold", fontSize: 14 }}>{load ? T.analysing : T.analyse}</button></div>}
+        {img && !showCam && <div style={{ marginTop: 12, position: "relative" }}><img src={img} style={{ width: "100%", borderRadius: 14, maxHeight: 340, objectFit: "cover", border: "3px solid #22c55e" }} /><span style={{ position: "absolute", top: 10, right: 10, background: "white", borderRadius: "50%", width: 48, height: 48, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, boxShadow: "0 2px 10px rgba(0,0,0,.3)" }}>🩺</span><button onClick={analyse} style={{ width: "100%", padding: 13, background: "linear-gradient(90deg,#E86A33,#FF8A3D)", color: "#fff", border: 0, borderRadius: 12, marginTop: 8, fontWeight: "bold", fontSize: 14 }}>{load ? T.analysing : T.analyse}</button></div>}
         {img && <div style={{ display: "flex", gap: 8, marginTop: 10, overflowX: "auto" }}><img src={img} style={{ width: 70, height: 70, objectFit: "cover", borderRadius: 12, border: "2px solid #22c55e" }} alt="" />{myPlants.slice(0,4).map((g:any,i:number)=>(<img key={i} src={g.img} style={{ width: 70, height: 70, objectFit: "cover", borderRadius: 12, border: "2px solid #ddd" }} alt="" />))}</div>}
         {errMsg && <div style={{ background: "#FEE2E2", color: "#991B1B", padding: 12, borderRadius: 12, marginTop: 10, fontSize: 13, lineHeight: 1.5, border: "1px solid #FCA5A5" }}>⚠️ {errMsg}</div>}
       </div>
