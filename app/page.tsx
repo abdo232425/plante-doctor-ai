@@ -12,10 +12,11 @@ export default function Home() {
   const [confetti, setConfetti] = useState(false);
   const [errMsg, setErrMsg] = useState("");
   const [myPlants, setMyPlants] = useState<any[]>([]);
+  const loadedRef = useRef(false);
   const videoRef = useRef<any>(null);
   const streamRef = useRef<any>(null);
-  useEffect(() => { try { const s = localStorage.getItem("mon-jardin-plantes"); if (s) setMyPlants(JSON.parse(s)); } catch {} }, []);
-  useEffect(() => { try { localStorage.setItem("mon-jardin-plantes", JSON.stringify(myPlants)); } catch {} }, [myPlants]);
+  useEffect(() => { try { const s = localStorage.getItem("mon-jardin-plantes"); if (s) { const arr = JSON.parse(s); if (Array.isArray(arr)) { const now = Date.now(); const valid = arr.filter((pl: any) => { if (!pl.savedAt) return true; return (now - pl.savedAt) < 48*60*60*1000; }); setMyPlants(valid); } } } catch {} loadedRef.current = true; }, []);
+  useEffect(() => { if (!loadedRef.current) return; try { localStorage.setItem("mon-jardin-plantes", JSON.stringify(myPlants)); } catch {} }, [myPlants]);
 
   const T = lang === "ar" ? {
     title: "طبيب النباتات", sub: "صور نبتتك و خلي AI الحقيقي يشخصها ليك",
@@ -144,17 +145,17 @@ export default function Home() {
     if (ai) {
       setRes(ai);
       const displayName = ai.scientific ? ai.name + " (" + ai.scientific + ")" : ai.name;
-      const newPlant = { name: displayName, img: img, status: ai.health > 70 ? "À surveiller" : "Alerte", statusAr: ai.health > 70 ? "راقبها" : "خطر", water: ai.watering, waterAr: ai.watering, growth: ai.health, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance" };
+      const now = Date.now(); const newPlant = { name: displayName, img: img, status: ai.health > 70 ? "À surveiller" : "Alerte", statusAr: ai.health > 70 ? "راقبها" : "خطر", water: ai.watering, waterAr: ai.watering, growth: ai.health, growthLabel: "مرحلة النمو", growthLabelFr: "Croissance", savedAt: now, expiresAt: now + 48*60*60*1000 };
       setMyPlants((prev) => [newPlant, ...prev]);
       setConfetti(true); setTimeout(()=>setConfetti(false), 2000);
     }
     setLoad(false);
   };
-  const removePlant = (idx: number) => { setMyPlants((prev) => prev.filter((_, i) => i !== idx)); };
+  const removePlant = (idx: number) => { setMyPlants((prev) => { const next = prev.filter((_, i) => i !== idx); try { localStorage.setItem("mon-jardin-plantes", JSON.stringify(next)); } catch {} return next; }); };
   const FALLING = ["🍃","🍂","🌿","🍁","🌱","🍃","🍂","🌿","🍁","🍃","🌱","🍂"];
 
   return (
-    <main style={{ maxWidth: 680, width: "100%", margin: "auto", padding: 16, paddingBottom: 60, fontFamily: "sans-serif", minHeight: "auto", height: "auto", color: "#111", position: "relative", background: "#fff", overflow: "visible", colorScheme: "light" }}>
+    <main style={{ maxWidth: 680, width: "100%", margin: "auto", padding: 16, paddingBottom: 60, fontFamily: "sans-serif", minHeight: "auto", height: "auto", color: "#111", position: "relative", background: "#ffffff", overflowX: "hidden", overflowY: "visible", colorScheme: "light" }}>
       <style>{`
         @keyframes float{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
         @keyframes shine{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
@@ -170,8 +171,10 @@ export default function Home() {
         .topLogo{animation:pulseLogo 2s infinite; display:inline-flex; align-items:center; gap:6px}
         .falling{position:absolute; top:-80px; animation:fall linear infinite; opacity:0.9; pointer-events:none; z-index:0}
         .iBtn{animation:iMove 2s infinite !important}
+        body, html { background: #ffffff !important; margin: 0; padding: 0; overflow-x: hidden; }
+        * { box-sizing: border-box; }
       `}</style>
-      <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0, overflow: "hidden" }}>
+      <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0, overflow: "hidden", background: "transparent" }}>
         {FALLING.map((e, i) => (<span key={i} className="falling" style={{ left: `${(i * 8 + 3) % 100}%`, fontSize: 22 + (i % 3) * 8, animationDuration: `${7 + (i % 5) * 2}s`, animationDelay: `${i * 0.9}s` }}>{e}</span>))}
       </div>
       {confetti && <div style={{ position: "absolute", top: 0, left: 0, right: 0, textAlign: "center", zIndex: 99, pointerEvents: "none" }}><span className="confetti" style={{ left: "15%" }}>🌸</span><span className="confetti" style={{ left: "50%" }}>⭐</span><span className="confetti" style={{ left: "80%" }}>✨</span></div>}
@@ -206,7 +209,7 @@ export default function Home() {
         {img && <div style={{ display: "flex", gap: 8, marginTop: 10, overflowX: "auto" }}><img src={img} style={{ width: 70, height: 70, objectFit: "cover", borderRadius: 12, border: "2px solid #22c55e" }} alt="" />{myPlants.slice(0,4).map((g:any,i:number)=>(<img key={i} src={g.img} style={{ width: 70, height: 70, objectFit: "cover", borderRadius: 12, border: "2px solid #ddd" }} alt="" />))}</div>}
         {errMsg && <div style={{ background: "#FEE2E2", color: "#991B1B", padding: 12, borderRadius: 12, marginTop: 10, fontSize: 13, lineHeight: 1.5, border: "1px solid #FCA5A5" }}>⚠️ {errMsg}</div>}
       </div>
-      {res && <div style={{ background: "#fff", padding: 16, borderRadius: 18, marginTop: 12, border: "2px solid #dcfce7" }}>
+      {res && <div style={{ background: "#fff", padding: 16, borderRadius: 18, marginTop: 12, border: "1px solid #eeeeee",}}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ width: 82, height: 82, borderRadius: "50%", background: `conic-gradient(#22c55e ${res.health * 3.6}deg, #eee 0deg)`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
             <div style={{ width: 62, height: 62, background: "#fff", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: 18 }}>{res.health}%</div>
@@ -224,14 +227,14 @@ export default function Home() {
         <h1 style={{ margin: "10px 0 5px 0", fontSize: 26 }}>{T.gardenTitle}</h1>
         <p style={{ margin: 0, fontSize: 14 }}>{T.gardenSub}</p>
         <div style={{ marginTop: 10, display: "flex", justifyContent: "center", gap: 8 }}>
-          <span style={{ background: "rgba(255,255,255,0.25)", padding: "5px 10px", borderRadius: 20, fontSize: 12 }}>🪴 {myPlants.length} {T.gardenBadge1}</span>
+          <span style={{ background: "rgba(255,255,255,0.25)", padding: "5px 10px", borderRadius: 20, fontSize: 12 }}>🪴 {myPlants.length} {T.gardenBadge1} - ⏰ 48h</span>
           <span style={{ background: "rgba(255,255,255,0.25)", padding: "5px 10px", borderRadius: 20, fontSize: 12 }}>💧 {T.gardenBadge2}</span>
         </div>
       </div>
       <div style={{ marginTop: 12 }}>
         {myPlants.length === 0 && <div style={{ background: "#fff", padding: 20, borderRadius: 18, textAlign: "center", color: "#666" }}>🌱<br />{(T as any).emptyGarden}</div>}
         {myPlants.map((p: any, i: number) => (
-          <div key={i} style={{ background: "#fff", padding: 12, borderRadius: 18, marginBottom: 10, display: "flex", gap: 12, alignItems: "center", boxShadow: "0 4px 18px rgba(0,0,0,0.06)", border: "1px solid #BBF7D0" }}>
+          <div key={i} style={{ background: "#fff", padding: 12, borderRadius: 18, marginBottom: 10, display: "flex", gap: 12, alignItems: "center", boxShadow: "0 4px 18px rgba(0,0,0,0.06)", border: "1px solid #eeeeee" }}>
             <img src={p.img} alt={p.name} style={{ width: 85, height: 85, borderRadius: 14, objectFit: "cover", flexShrink: 0 }} />
             <div style={{ flex: 1 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
@@ -253,7 +256,7 @@ export default function Home() {
       </>}
       </div>
       <button onClick={() => setShowTeam(true)} className="iBtn" style={{ position: "fixed", bottom: 88, right: 16, zIndex: 90, width: 44, height: 44, minWidth: 44, minHeight: 44, borderRadius: "50%", background: "#ffffff", color: "#0F3D2E", border: "2px solid #FFD700", fontSize: 22, fontWeight: "900", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", lineHeight: "1", padding: 0, whiteSpace: "nowrap", overflow: "hidden", flexShrink: 0 }}>i</button>
-      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 80, background: "#fff", borderTop: "1px solid #eee", padding: "10px 12px", display: "flex", gap: 10, boxShadow: "0 -2px 12px rgba(0,0,0,0.08)" }}>
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 80, background: "#ffffff", borderTop: "1px solid #eeeeee", padding: "10px 12px", display: "flex", gap: 10, boxShadow: "0 -2px 12px rgba(0,0,0,0.08)" }}>
         <button onClick={() => setPage("home")} style={{ flex: 1, padding: 12, borderRadius: 14, border: "none", background: page === "home" ? "linear-gradient(135deg,#0F3D2E,#1a7a4a)" : "#F3F4F6", color: page === "home" ? "#fff" : "#0F3D2E", fontWeight: "bold", fontSize: 14, cursor: "pointer" }}>🩺 {T.navHome}</button>
         <button onClick={() => setPage("garden")} style={{ flex: 1, padding: 12, borderRadius: 14, border: "none", background: page === "garden" ? "linear-gradient(135deg,#E86A33,#FF8A3D)" : "#F3F4F6", color: page === "garden" ? "#fff" : "#0F3D2E", fontWeight: "bold", fontSize: 14, cursor: "pointer" }}>🌿 {T.navGarden}</button>
       </div>
