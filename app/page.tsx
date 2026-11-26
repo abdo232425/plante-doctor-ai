@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 
 export default function Home() {
   const [lang, setLang] = useState<"ar"|"fr">("fr");
@@ -15,6 +15,10 @@ export default function Home() {
   const videoRef = useRef<any>(null);
   const streamRef = useRef<any>(null);
 
+  // SAUVEGARDE Mon jardin - meme si tu eteins le PC, les plantes restent
+  useEffect(() => { try { const s = localStorage.getItem("mon-jardin-plantes"); if (s) setMyPlants(JSON.parse(s)); } catch {} }, []);
+  useEffect(() => { try { localStorage.setItem("mon-jardin-plantes", JSON.stringify(myPlants)); } catch {} }, [myPlants]);
+
   const T = lang === "ar" ? {
     title: "طبيب النباتات", sub: "صور نبتتك و خلي AI الحقيقي يشخصها ليك",
     cam: "افتح الكاميرا", gal: "من المعرض", take: "التقط الصورة",
@@ -22,14 +26,14 @@ export default function Home() {
     aiBadge: "AI دقيق", camBadge: "كاميرا مباشرة",
     health: "الصحة", disease: "المرض", watering: "السقي", light: "الضوء", soil: "التربة", treat: "العلاج", sci: "الاسم العلمي",
     capTitle: "شنو كيعرف يدير التطبيق؟", tipTitle: "نصيحة اليوم", tip: "ما تسقيش النبتة بزاف، خلي التربة تنشف شوية عاد سقيها، و حطها فبلاصة فيها الضو.",
-    gardenTitle: "حديقتي", gardenSub: "غير النباتات لي حللتيها نيت - ما كاين والو مزيف",
+    gardenTitle: "حديقتي", gardenSub: "غير النباتات لي حللتيها نيت - محفوظة واخا تطفي البيسي",
     gardenBadge1: "نباتاتي فقط", gardenBadge2: "متابعة حية",
     teamTitle: "فريق البحث", school: "ثانوية عبدالله بن ياسين - إنزكان، أيت ملول", made: "صُنع بحب في المغرب",
     members: "أعضاء الفريق - 4 أشخاص", close: "سد",
     navHome: "تشخيص", navGarden: "حديقتي",
     caps: ["📸 تحليل أي نبتة من التصويرة بـ AI الدقيق","🌱 يعطيك اسم النبتة الحقيقي و الاسم العلمي","🩺 تشخيص دقيق للمرض و الصحة","💧 تتبع السقي و مراحل النمو","🌍 نصائح الضوء و التربة و العلاج","🇲🇦🇫🇷 عربية كاملة أو فرنسية كاملة"],
     plants: [] as any[],
-    emptyGarden: "حديقتك خاوية. صور شي نبتة و حللها، غادي تبان هنا بوحدها."
+    emptyGarden: "حديقتك خاوية. صور شي نبتة و حللها، غادي تبان هنا بوحدها و تبقى محفوظة."
   } : {
     title: "Plante Doctor", sub: "Prends ta plante en photo, le vrai AI la diagnostique avec précision",
     cam: "Ouvrir Caméra", gal: "Galerie", take: "Prendre photo",
@@ -37,14 +41,14 @@ export default function Home() {
     aiBadge: "AI précis", camBadge: "Caméra en direct",
     health: "Santé", disease: "Maladie", watering: "Arrosage", light: "Lumière", soil: "Sol", treat: "Traitement", sci: "Nom scientifique",
     capTitle: "Que peut faire l'application ?", tipTitle: "Conseil du jour", tip: "Ne pas trop arroser ta plante, laisse sécher la terre un peu avant de l'arroser, et mets-la à la lumière.",
-    gardenTitle: "Mon jardin", gardenSub: "Uniquement les plantes que TU as analysées - rien de faux",
+    gardenTitle: "Mon jardin", gardenSub: "Uniquement les plantes que TU as analysées - sauvegardées même si tu éteins le PC",
     gardenBadge1: "Mes plantes", gardenBadge2: "Suivi en direct",
     teamTitle: "Équipe de Recherche", school: "Lycée Abdellah Ben Yassine - Inezgane, Aït Melloul", made: "Fait avec amour au Maroc",
     members: "Membres - 4 personnes", close: "Fermer",
     navHome: "Diagnostic", navGarden: "Mon jardin",
     caps: ["📸 Analyser n'importe quelle plante avec AI précis","🌱 Donner le vrai nom et le nom scientifique","🩺 Diagnostic précis de la maladie et de la santé","💧 Suivi de l'arrosage et des étapes de croissance","🌍 Conseils lumière, sol et traitement","🇲🇦🇫🇷 Tout en arabe ou tout en français"],
     plants: [] as any[],
-    emptyGarden: "Ton jardin est vide. Prends une plante en photo et analyse-la, elle apparaîtra ici toute seule."
+    emptyGarden: "Ton jardin est vide. Prends une plante en photo et analyse-la, elle apparaîtra ici et restera sauvegardée."
   };
 
   const openCam = async () => {
@@ -63,7 +67,7 @@ export default function Home() {
 
   const callAI = async (model: string, base64: string, prompt: string, key: string) => {
     const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 10000); // TEMPS LIMITE: 10 secondes max, sinon on coupe
+    const timer = setTimeout(() => ctrl.abort(), 10000);
     try {
       const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
         method: "POST", headers: { "Content-Type": "application/json" }, signal: ctrl.signal,
@@ -76,54 +80,53 @@ export default function Home() {
       return await r.json();
     } catch (e) { clearTimeout(timer); throw e; }
   };
-  // ===== CONNAISSANCE MAROC - on lui apprend toutes les plantes du Maroc =====
+
   const MAROC = `TOUTES LES PLANTES DU MAROC - TU LES CONNAIS TOUTES, TOUTES LES CATEGORIES:
-  === 1. HERBES ET PLANTES SAUVAGES / NATURELLES DU MAROC ===
+  === HERBES ET PLANTES SAUVAGES / NATURELLES ===
   - Ortie / Hriga (Urtica dioica): feuilles fortement dentees + poils urticants. Maladies: pucerons. Arrosage: moderé, sol humide. Croissance: pousse vite au printemps, 30-120cm.
-  - Chardon / Chouk (Cynara): grandes feuilles epineuses. Maladies: oidium. Arrosage: peu d'eau. Croissance: lente, 2 ans.
-  - Mauve / Khobiza (Malva): feuilles rondes, fleurs violettes. Maladies: rouille. Arrosage: regulier. Croissance: rapide.
+  - Chardon / Chouk: grandes feuilles epineuses. Maladies: oidium. Arrosage: peu d'eau. Croissance: lente, 2 ans.
+  - Mauve / Khobiza: feuilles rondes, fleurs violettes. Maladies: rouille. Arrosage: regulier. Croissance: rapide.
   - Pissenlit: feuilles dentees, fleur jaune. Maladies: rarement. Arrosage: peu. Croissance: tres rapide.
   - Pourpier / Rjla: tiges rampantes, feuilles charnues. Maladies: rarement. Arrosage: peu.
-  === 2. PLANTES MEDICINALES ET AROMATIQUES DU MAROC ===
-  - Menthe / Naanaa (Mentha): tige CARREE, feuilles opposees, parfum fort. Maladies: rouille orange, oidium. Arrosage: beaucoup, sol toujours humide. Croissance: tres rapide, envahissante.
+  === PLANTES MEDICINALES ET AROMATIQUES ===
+  - Menthe / Naanaa (Mentha): tige CARREE, feuilles opposees, parfum fort. Maladies: rouille orange, oidium. Arrosage: beaucoup, sol toujours humide. Croissance: tres rapide.
   - Romarin / Azir: aiguilles parfumees. Maladies: pourriture racines si trop d'eau. Arrosage: tres peu, sol sec. Croissance: lente.
   - Thym / Zaatar: petites feuilles parfumees. Maladies: pourriture si trop d'eau. Arrosage: peu. Croissance: lente.
   - Sauge / Salmia: feuilles veloutees grises. Maladies: oidium. Arrosage: peu. Croissance: moyenne.
   - Verveine / Louiza: feuilles longues parfumees citron. Maladies: pucerons. Arrosage: regulier. Croissance: rapide en ete.
   - Lavande / Khzama: fleurs violettes parfumees. Maladies: pourriture. Arrosage: peu. Croissance: lente.
   - Armoise / Chih: feuilles grises ameres. Maladies: rarement. Arrosage: peu. Croissance: rapide.
-  - Absinthe: feuilles grises decoupees. Maladies: oidium. Arrosage: peu.
-  === 3. ARBRES DU MAROC ===
-  - Olivier / Zitoun (Olea): feuilles lanceolees vert-gris. Maladies: oeil de paon taches noires, mouche olive. Arrosage: peu, resistant secheresse. Croissance: tres lente, 100 ans.
-  - Oranger / Limoun (Citrus): feuilles ovales brillantes, fleurs blanches parfumees. Maladies: cochenilles, gommose. Arrosage: regulier 2x semaine. Croissance: moyenne.
+  === ARBRES DU MAROC ===
+  - Olivier / Zitoun: feuilles lanceolees vert-gris. Maladies: oeil de paon taches noires, mouche olive. Arrosage: peu. Croissance: tres lente.
+  - Oranger / Limoun: feuilles ovales brillantes, fleurs blanches parfumees. Maladies: cochenilles, gommose. Arrosage: regulier 2x semaine. Croissance: moyenne.
   - Citronnier: comme oranger, fruit jaune. Maladies: mineuse. Arrosage: regulier.
   - Figuier / Karmous: grandes feuilles 5 lobes. Maladies: rouille. Arrosage: peu. Croissance: rapide.
   - Grenadier / Roumane: fleurs rouges, fruit grenade. Maladies: pucerons. Arrosage: moderé. Croissance: moyenne.
   - Palmier dattier / Nakhal: palmes, dattes. Maladies: charancon rouge, bayoud. Arrosage: beaucoup en ete. Croissance: tres lente.
-  - Argan (Argania spinosa - unique Maroc): arbre epineux, fruit argan. Maladies: rarement. Arrosage: tres peu. Croissance: tres lente.
+  - Argan (unique Maroc): arbre epineux, fruit argan. Maladies: rarement. Arrosage: tres peu. Croissance: tres lente.
   - Cedre / Arz: grand conifere Atlas. Maladies: chenilles. Arrosage: pluie seulement. Croissance: lente.
   - Eucalyptus: feuilles longues parfumees. Maladies: psylle. Arrosage: beaucoup. Croissance: tres rapide.
-  === 4. PLANTES D'ORNEMENT DU MAROC ===
+  === PLANTES D'ORNEMENT ===
   - Geranium / Atarcha: feuilles rondes, fleurs rouges. Maladies: rouille. Arrosage: moderé. Croissance: rapide.
   - Jasmin: liane, fleurs blanches parfumees. Maladies: cochenilles. Arrosage: regulier. Croissance: rapide.
   - Bougainvillier: bractees roses/violettes. Maladies: pucerons. Arrosage: peu. Croissance: rapide.
   - Rose / Ward: fleurs parfumees. Maladies: oidium, taches noires. Arrosage: regulier. Croissance: moyenne.
   - Aloe Vera / Sabbar: feuilles charnues epineuses, gel. Maladies: pourriture si trop d'eau. Arrosage: tres peu. Croissance: lente.
-  - Cactus / Hindi (Opuntia): raquettes plates epines. Maladies: cochenille. Arrosage: tres peu. Croissance: lente.
-  === 5. PLANTES A FRUITS ET LEGUMES DU MAROC ===
+  - Cactus / Hindi: raquettes plates epines. Maladies: cochenille. Arrosage: tres peu. Croissance: lente.
+  === FRUITS ET LEGUMES ===
   - Fraise / Tout: rampante, 3 folioles, fruit rouge. Maladies: oidium poudre blanche, pourriture grise. Arrosage: regulier sans mouiller feuilles. Croissance: rapide, fruits en 2 mois.
   - Vigne / Dalia: liane, feuilles decoupees. Maladies: mildiou, oidium. Arrosage: moderé. Croissance: rapide.
   - Tomate / Maticha: feuilles decoupees, fruit rouge. Maladies: mildiou, cul noir. Arrosage: regulier. Croissance: rapide 2-3 mois.
   - Pomme de terre / Batata: feuilles composees, tubercules. Maladies: mildiou, doryphore. Arrosage: regulier. Croissance: 3-4 mois.
   - Piment / Felfla: feuilles ovales, fruit piment. Maladies: pucerons, mosaique. Arrosage: regulier. Croissance: 2-3 mois.
   - Courgette / Graa: grandes feuilles, fruit vert. Maladies: oidium. Arrosage: beaucoup. Croissance: tres rapide.
-  === 6. CEREALES ET PLANTES DES CHAMPS DU MAROC ===
+  === CEREALES ET CHAMPS ===
   - Ble / Qamh: tiges hautes, epis. Maladies: rouille, septoriose. Arrosage: pluie. Croissance: 6 mois.
   - Orge / Chair: comme ble. Maladies: oidium. Arrosage: pluie. Croissance: 5 mois.
   - Mais / Dra: tiges hautes, epis. Maladies: pyrale. Arrosage: beaucoup. Croissance: 3-4 mois.
   - Feve / Foul: fleurs blanches/noires, gousses. Maladies: pucerons noirs. Arrosage: moderé. Croissance: 3 mois.
   - Pois chiche / Hommos: petites feuilles, gousses. Maladies: anthracnose. Arrosage: peu. Croissance: 3 mois.
-  === 7. PLANTES D'INTERIEUR AU MAROC ===
+  === PLANTES D'INTERIEUR ===
   - Monstera: GRANDES feuilles TROUEES. Maladies: taches brunes si trop d'eau. Arrosage: peu, laisser secher. Croissance: rapide.
   - Pothos: liane, feuilles coeur. Maladies: pourriture. Arrosage: peu. Croissance: tres rapide.
   - Ficus: feuilles ovales brillantes. Maladies: chute feuilles si courant d'air. Arrosage: moderé. Croissance: lente.
@@ -134,19 +137,8 @@ export default function Home() {
     if (!key) { setErrMsg(lang === "ar" ? "المفتاح ما كاينش في Vercel" : "Clé manquante dans Vercel"); return null; }
     const base64 = image.split(",")[1];
     const prompt = lang === "ar"
-      ? `أنت عالم نباتات خبير يعرف جميع أنواع النباتات في العالم، وخاصة نباتات المغرب. هذا هو علمك عن المغرب: ${MAROC}
-      أنت تعرف جميع أنواع النباتات في العالم: أشجار، نباتات الزينة، نباتات طبية وعطرية، صبار، نباتات الفواكه، نباتات الحبوب، نباتات داخلية وخارجية، وكل أنواع النباتات. وتعرف جميع أمراض النباتات: فطريات، بكتيريا، فيروسات، حشرات، نقص عناصر، جفاف، زيادة سقي.
-      القاعدة الذهبية: ممنوع تخمن الاسم. إذا عرفت النبتة بـ 100% قل اسمها الحقيقي. إذا لم تكن متأكدا، لا تكتب أي اسم غالط، اكتب "نبتة غير محددة" في الاسم واترك الاسم العلمي فارغا.
-      المهم جدا: حتى إذا لم تعرف الاسم، حلل المرض والسقي والعلاج بصحيح 100% من ما تراه فعلا في الصورة: لون الأوراق، بقع، اصفرار، ذبول، جفاف، حشرات، شكل الورقة، الساق.
-      لا تقل مونستيرا إلا إذا رأيت أوراقا مثقوبة كبيرة فعلا. لا تقل أفوكا إلا إذا رأيت شجرة بأوراق كبيرة ملساء. لا تقل نعناع إلا إذا رأيت ساقا مربعة وأوراقا متقابلة. لا تقل توت إلا إذا رأيت نبتة زاحفة بثلاث وريقات وثمرة حمراء. لا تقل حريقة إلا إذا رأيت شعيرات لاسعة.
-      أعد فقط JSON: {"name":"الاسم الحقيقي بالعربية أو نبتة غير محددة","scientific":"الاسم العلمي أو فارغ","health": رقم 0-100 حسب ما تراه فعلا,"disease":"المرض الظاهر فعلا بالعربية - حلله من الأعراض","watering":"السقي بالعربية - صحيح حسب المرض","light":"الضوء بالعربية","soil":"التربة بالعربية","treatment":"العلاج بالعربية - خطوة بخطوة حسب المرض"}`
-      : `Tu es un botaniste expert qui connait TOUS les types de plantes du monde, et surtout les plantes du MAROC. Voici ta connaissance du Maroc: ${MAROC}
-      Tu connais TOUS les types de plantes du monde: arbres, plantes d'ornement, plantes medicinales et aromatiques, cactus, plantes a fruits, plantes a cereales, plantes d'interieur et d'exterieur, et tous les types de plantes. Et tu connais TOUTES les maladies des plantes: champignons, bacteries, virus, insectes, carences, secheresse, exces d'arrosage.
-      Regle d'or: INTERDIT de deviner le nom. Si tu connais la plante a 100%, dis son vrai nom. Si tu n'es pas sur, n'ecris AUCUN faux nom, ecris "Plante non identifiée" dans le nom et laisse le nom scientifique vide.
-      Tres important: meme si tu ne connais pas le nom, analyse la maladie, l'arrosage et le traitement a 100% juste d'apres ce que tu vois VRAIMENT dans la photo: couleur des feuilles, taches, jaunissement, fletrissement, secheresse, insectes, forme de la feuille, tige.
-      Ne dis JAMAIS Monstera sauf si tu vois vraiment de grandes feuilles trouees. Ne dis JAMAIS Avocat sauf si tu vois un arbre a grandes feuilles lisses. Ne dis JAMAIS Menthe sauf si tu vois tige carree et feuilles opposees. Ne dis JAMAIS Fraise sauf si tu vois plante rampante a 3 folioles et fruit rouge. Ne dis JAMAIS Ortie sauf si tu vois poils urticants.
-      Retourne UNIQUEMENT ce JSON: {"name":"vrai nom en français ou Plante non identifiée","scientific":"vrai nom scientifique ou vide","health": nombre 0-100 selon ce que tu vois vraiment,"disease":"maladie visible vraiment en français - analyse les symptomes","watering":"arrosage en français - juste selon la maladie","light":"lumière en français","soil":"sol en français","treatment":"traitement en français - etape par etape selon la maladie"}`;
-    // UN SEUL MODELE RAPIDE - pas 3 essais = pas de retard
+      ? `أنت عالم نباتات خبير يعرف جميع أنواع النباتات في العالم، وخاصة نباتات المغرب. هذا هو علمك عن المغرب: ${MAROC} أنت تعرف جميع أنواع النباتات في العالم: أشجار، زينة، طبية وعطرية، صبار، فواكه، حبوب، داخلية وخارجية، وكل أنواع النباتات. وتعرف جميع أمراض النباتات. القاعدة: ممنوع تخمن الاسم. إذا عرفت النبتة بـ 100% قل اسمها. إذا لم تكن متأكدا، لا تكتب أي اسم غالط، اكتب "نبتة غير محددة" واترك العلمي فارغا. المهم: حتى إذا لم تعرف الاسم، حلل المرض والسقي والعلاج بصحيح 100% من ما تراه فعلا: لون الأوراق، بقع، اصفرار، ذبول، جفاف، حشرات. لا تقل مونستيرا إلا إذا رأيت أوراقا مثقوبة كبيرة. لا تقل أفوكا إلا إذا رأيت شجرة بأوراق كبيرة ملساء. لا تقل نعناع إلا إذا رأيت ساقا مربعة وأوراقا متقابلة. لا تقل توت إلا إذا رأيت نبتة زاحفة بثلاث وريقات وثمرة حمراء. لا تقل حريقة إلا إذا رأيت شعيرات لاسعة. أعد فقط JSON: {"name":"الاسم الحقيقي بالعربية أو نبتة غير محددة","scientific":"الاسم العلمي أو فارغ","health": رقم 0-100,"disease":"المرض الظاهر فعلا بالعربية","watering":"السقي بالعربية","light":"الضوء بالعربية","soil":"التربة بالعربية","treatment":"العلاج بالعربية"}`
+      : `Tu es un botaniste expert qui connait TOUS les types de plantes du monde, et surtout les plantes du MAROC. Voici ta connaissance du Maroc: ${MAROC} Tu connais TOUS les types de plantes du monde: arbres, ornement, medicinales, cactus, fruits, cereales, interieur et exterieur. Et tu connais TOUTES les maladies. Regle d'or: INTERDIT de deviner le nom. Si tu connais a 100%, dis son vrai nom. Si tu n'es pas sur, n'ecris AUCUN faux nom, ecris "Plante non identifiée" et laisse scientifique vide. Tres important: meme si tu ne connais pas le nom, analyse maladie, arrosage et traitement a 100% d'apres ce que tu vois VRAIMENT: couleur feuilles, taches, jaunissement, fletrissement, insectes. Ne dis JAMAIS Monstera sauf si grandes feuilles trouees. Ne dis JAMAIS Avocat sauf si arbre a grandes feuilles lisses. Ne dis JAMAIS Menthe sauf si tige carree et feuilles opposees. Ne dis JAMAIS Fraise sauf si rampante a 3 folioles et fruit rouge. Ne dis JAMAIS Ortie sauf si poils urticants. Retourne UNIQUEMENT ce JSON: {"name":"vrai nom en français ou Plante non identifiée","scientific":"vrai nom scientifique ou vide","health": nombre 0-100,"disease":"maladie visible vraiment en français","watering":"arrosage en français","light":"lumière en français","soil":"sol en français","treatment":"traitement en français"}`;
     for (const model of ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]) {
       try {
         const j = await callAI(model, base64, prompt, key);
@@ -184,12 +176,14 @@ export default function Home() {
     setLoad(false);
   };
 
+  const FALLING = ["🍃","🍂","🌿","🍁","🌱","🍃","🍂","🌿","🍁","🍃","🌱","🍂"];
+
   return (
     <main style={{ maxWidth: 680, width: "100%", margin: "auto", padding: 16, paddingBottom: 60, fontFamily: "sans-serif", minHeight: "auto", height: "auto", color: "#111", position: "relative", background: "#fff", overflow: "visible", colorScheme: "light" }}>
       <style>{`
         @keyframes float{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
         @keyframes shine{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-        @keyframes fall{0%{transform:translateY(-60px) rotate(0deg); opacity:0}10%{opacity:1}100%{transform:translateY(110vh) rotate(360deg); opacity:0}}
+        @keyframes fall{0%{transform:translateY(-100px) translateX(0) rotate(0deg); opacity:0}10%{opacity:1}50%{transform:translateY(50vh) translateX(20px) rotate(180deg)}90%{opacity:1}100%{transform:translateY(115vh) translateX(-20px) rotate(360deg); opacity:0}}
         @keyframes glowAI{0%,100%{text-shadow:0 0 8px #FFD700}50%{text-shadow:0 0 18px #FFD700, 0 0 30px #FFA500}}
         @keyframes pulseLogo{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
         @keyframes iMove{0%,100%{transform:translateY(0) rotate(0deg); box-shadow:0 0 10px #FFD700}50%{transform:translateY(-6px) rotate(5deg); box-shadow:0 0 20px #FFD700, 0 0 30px #FFA500}}
@@ -199,16 +193,12 @@ export default function Home() {
         .glowAI{animation:glowAI 1.8s infinite; font-weight:900; color:#FFD700; font-size:22px}
         .confetti{position:absolute; top:0; font-size:20px; animation:fall 2s forwards}
         .topLogo{animation:pulseLogo 2s infinite; display:inline-flex; align-items:center; gap:6px}
-        .falling{position:absolute; top:0; font-size:26px; animation:fall linear infinite; opacity:0.7; pointer-events:none; z-index:0}
+        .falling{position:absolute; top:-80px; animation:fall linear infinite; opacity:0.9; pointer-events:none; z-index:0}
         .iBtn{animation:iMove 2s infinite !important}
       `}</style>
-      <span className="falling" style={{ left: "5%", animationDuration: "7s" }}>🌿</span>
-      <span className="falling" style={{ left: "18%", animationDuration: "9s", animationDelay: "1s" }}>🍃</span>
-      <span className="falling" style={{ left: "32%", animationDuration: "8s", animationDelay: "2s" }}>🌱</span>
-      <span className="falling" style={{ left: "48%", animationDuration: "10s", animationDelay: "0.5s" }}>🪴</span>
-      <span className="falling" style={{ left: "62%", animationDuration: "7s", animationDelay: "1.5s" }}>🌿</span>
-      <span className="falling" style={{ left: "78%", animationDuration: "9s", animationDelay: "0.2s" }}>🍃</span>
-      <span className="falling" style={{ left: "90%", animationDuration: "8s", animationDelay: "2.5s" }}>🌱</span>
+      <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0, overflow: "hidden" }}>
+        {FALLING.map((e, i) => (<span key={i} className="falling" style={{ left: `${(i * 8 + 3) % 100}%`, fontSize: 22 + (i % 3) * 8, animationDuration: `${7 + (i % 5) * 2}s`, animationDelay: `${i * 0.9}s` }}>{e}</span>))}
+      </div>
       {confetti && <div style={{ position: "absolute", top: 0, left: 0, right: 0, textAlign: "center", zIndex: 99, pointerEvents: "none" }}><span className="confetti" style={{ left: "15%" }}>🌸</span><span className="confetti" style={{ left: "50%" }}>⭐</span><span className="confetti" style={{ left: "80%" }}>✨</span></div>}
       <div style={{ position: "relative", zIndex: 1 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
