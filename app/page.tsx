@@ -14,8 +14,6 @@ export default function Home() {
   const [myPlants, setMyPlants] = useState<any[]>([]);
   const videoRef = useRef<any>(null);
   const streamRef = useRef<any>(null);
-
-  // SAUVEGARDE Mon jardin - meme si tu eteins le PC, les plantes restent
   useEffect(() => { try { const s = localStorage.getItem("mon-jardin-plantes"); if (s) setMyPlants(JSON.parse(s)); } catch {} }, []);
   useEffect(() => { try { localStorage.setItem("mon-jardin-plantes", JSON.stringify(myPlants)); } catch {} }, [myPlants]);
 
@@ -26,14 +24,14 @@ export default function Home() {
     aiBadge: "AI دقيق", camBadge: "كاميرا مباشرة",
     health: "الصحة", disease: "المرض", watering: "السقي", light: "الضوء", soil: "التربة", treat: "العلاج", sci: "الاسم العلمي",
     capTitle: "شنو كيعرف يدير التطبيق؟", tipTitle: "نصيحة اليوم", tip: "ما تسقيش النبتة بزاف، خلي التربة تنشف شوية عاد سقيها، و حطها فبلاصة فيها الضو.",
-    gardenTitle: "حديقتي", gardenSub: "غير النباتات لي حللتيها نيت - محفوظة واخا تطفي البيسي",
+    gardenTitle: "حديقتي", gardenSub: "غير النباتات لي حللتيها نيت - محفوظة",
     gardenBadge1: "نباتاتي فقط", gardenBadge2: "متابعة حية",
     teamTitle: "فريق البحث", school: "ثانوية عبدالله بن ياسين - إنزكان، أيت ملول", made: "صُنع بحب في المغرب",
     members: "أعضاء الفريق - 4 أشخاص", close: "سد",
     navHome: "تشخيص", navGarden: "حديقتي",
     caps: ["📸 تحليل أي نبتة من التصويرة بـ AI الدقيق","🌱 يعطيك اسم النبتة الحقيقي و الاسم العلمي","🩺 تشخيص دقيق للمرض و الصحة","💧 تتبع السقي و مراحل النمو","🌍 نصائح الضوء و التربة و العلاج","🇲🇦🇫🇷 عربية كاملة أو فرنسية كاملة"],
     plants: [] as any[],
-    emptyGarden: "حديقتك خاوية. صور شي نبتة و حللها، غادي تبان هنا بوحدها و تبقى محفوظة."
+    emptyGarden: "حديقتك خاوية. صور شي نبتة و حللها، غادي تبان هنا بوحدها."
   } : {
     title: "Plante Doctor", sub: "Prends ta plante en photo, le vrai AI la diagnostique avec précision",
     cam: "Ouvrir Caméra", gal: "Galerie", take: "Prendre photo",
@@ -41,16 +39,15 @@ export default function Home() {
     aiBadge: "AI précis", camBadge: "Caméra en direct",
     health: "Santé", disease: "Maladie", watering: "Arrosage", light: "Lumière", soil: "Sol", treat: "Traitement", sci: "Nom scientifique",
     capTitle: "Que peut faire l'application ?", tipTitle: "Conseil du jour", tip: "Ne pas trop arroser ta plante, laisse sécher la terre un peu avant de l'arroser, et mets-la à la lumière.",
-    gardenTitle: "Mon jardin", gardenSub: "Uniquement les plantes que TU as analysées - sauvegardées même si tu éteins le PC",
+    gardenTitle: "Mon jardin", gardenSub: "Uniquement les plantes que TU as analysées - sauvegardées",
     gardenBadge1: "Mes plantes", gardenBadge2: "Suivi en direct",
     teamTitle: "Équipe de Recherche", school: "Lycée Abdellah Ben Yassine - Inezgane, Aït Melloul", made: "Fait avec amour au Maroc",
     members: "Membres - 4 personnes", close: "Fermer",
     navHome: "Diagnostic", navGarden: "Mon jardin",
     caps: ["📸 Analyser n'importe quelle plante avec AI précis","🌱 Donner le vrai nom et le nom scientifique","🩺 Diagnostic précis de la maladie et de la santé","💧 Suivi de l'arrosage et des étapes de croissance","🌍 Conseils lumière, sol et traitement","🇲🇦🇫🇷 Tout en arabe ou tout en français"],
     plants: [] as any[],
-    emptyGarden: "Ton jardin est vide. Prends une plante en photo et analyse-la, elle apparaîtra ici et restera sauvegardée."
+    emptyGarden: "Ton jardin est vide. Prends une plante en photo et analyse-la, elle apparaîtra ici."
   };
-
   const openCam = async () => {
     try { setShowCam(true); const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }); streamRef.current = s; setTimeout(() => { if (videoRef.current) videoRef.current.srcObject = s; }, 300); }
     catch { alert(lang === "ar" ? "سمح للكاميرا" : "Autorise la caméra"); setShowCam(false); }
@@ -64,85 +61,54 @@ export default function Home() {
     const f = e.target.files[0]; if (!f) return;
     const r = new FileReader(); r.onload = () => { setImg(r.result as string); setShowCam(false); }; r.readAsDataURL(f); e.target.value = "";
   };
-
   const callAI = async (model: string, base64: string, prompt: string, key: string) => {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 10000);
     try {
       const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
         method: "POST", headers: { "Content-Type": "application/json" }, signal: ctrl.signal,
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: "image/jpeg", data: base64 } }] }],
-          generationConfig: { temperature: 0, topP: 0.1, topK: 1, maxOutputTokens: 1000 }
-        })
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: "image/jpeg", data: base64 } }] }], generationConfig: { temperature: 0, topP: 0.1, topK: 1, maxOutputTokens: 1000 } })
       });
       clearTimeout(timer);
       return await r.json();
     } catch (e) { clearTimeout(timer); throw e; }
   };
 
-  const MAROC = `TOUTES LES PLANTES DU MAROC - TU LES CONNAIS TOUTES, TOUTES LES CATEGORIES:
-  === HERBES ET PLANTES SAUVAGES / NATURELLES ===
-  - Ortie / Hriga (Urtica dioica): feuilles fortement dentees + poils urticants. Maladies: pucerons. Arrosage: moderé, sol humide. Croissance: pousse vite au printemps, 30-120cm.
-  - Chardon / Chouk: grandes feuilles epineuses. Maladies: oidium. Arrosage: peu d'eau. Croissance: lente, 2 ans.
-  - Mauve / Khobiza: feuilles rondes, fleurs violettes. Maladies: rouille. Arrosage: regulier. Croissance: rapide.
-  - Pissenlit: feuilles dentees, fleur jaune. Maladies: rarement. Arrosage: peu. Croissance: tres rapide.
-  - Pourpier / Rjla: tiges rampantes, feuilles charnues. Maladies: rarement. Arrosage: peu.
-  === PLANTES MEDICINALES ET AROMATIQUES ===
-  - Menthe / Naanaa (Mentha): tige CARREE, feuilles opposees, parfum fort. Maladies: rouille orange, oidium. Arrosage: beaucoup, sol toujours humide. Croissance: tres rapide.
-  - Romarin / Azir: aiguilles parfumees. Maladies: pourriture racines si trop d'eau. Arrosage: tres peu, sol sec. Croissance: lente.
-  - Thym / Zaatar: petites feuilles parfumees. Maladies: pourriture si trop d'eau. Arrosage: peu. Croissance: lente.
-  - Sauge / Salmia: feuilles veloutees grises. Maladies: oidium. Arrosage: peu. Croissance: moyenne.
-  - Verveine / Louiza: feuilles longues parfumees citron. Maladies: pucerons. Arrosage: regulier. Croissance: rapide en ete.
-  - Lavande / Khzama: fleurs violettes parfumees. Maladies: pourriture. Arrosage: peu. Croissance: lente.
-  - Armoise / Chih: feuilles grises ameres. Maladies: rarement. Arrosage: peu. Croissance: rapide.
-  === ARBRES DU MAROC ===
-  - Olivier / Zitoun: feuilles lanceolees vert-gris. Maladies: oeil de paon taches noires, mouche olive. Arrosage: peu. Croissance: tres lente.
-  - Oranger / Limoun: feuilles ovales brillantes, fleurs blanches parfumees. Maladies: cochenilles, gommose. Arrosage: regulier 2x semaine. Croissance: moyenne.
-  - Citronnier: comme oranger, fruit jaune. Maladies: mineuse. Arrosage: regulier.
-  - Figuier / Karmous: grandes feuilles 5 lobes. Maladies: rouille. Arrosage: peu. Croissance: rapide.
-  - Grenadier / Roumane: fleurs rouges, fruit grenade. Maladies: pucerons. Arrosage: moderé. Croissance: moyenne.
-  - Palmier dattier / Nakhal: palmes, dattes. Maladies: charancon rouge, bayoud. Arrosage: beaucoup en ete. Croissance: tres lente.
-  - Argan (unique Maroc): arbre epineux, fruit argan. Maladies: rarement. Arrosage: tres peu. Croissance: tres lente.
-  - Cedre / Arz: grand conifere Atlas. Maladies: chenilles. Arrosage: pluie seulement. Croissance: lente.
-  - Eucalyptus: feuilles longues parfumees. Maladies: psylle. Arrosage: beaucoup. Croissance: tres rapide.
-  === PLANTES D'ORNEMENT ===
-  - Geranium / Atarcha: feuilles rondes, fleurs rouges. Maladies: rouille. Arrosage: moderé. Croissance: rapide.
-  - Jasmin: liane, fleurs blanches parfumees. Maladies: cochenilles. Arrosage: regulier. Croissance: rapide.
-  - Bougainvillier: bractees roses/violettes. Maladies: pucerons. Arrosage: peu. Croissance: rapide.
-  - Rose / Ward: fleurs parfumees. Maladies: oidium, taches noires. Arrosage: regulier. Croissance: moyenne.
-  - Aloe Vera / Sabbar: feuilles charnues epineuses, gel. Maladies: pourriture si trop d'eau. Arrosage: tres peu. Croissance: lente.
-  - Cactus / Hindi: raquettes plates epines. Maladies: cochenille. Arrosage: tres peu. Croissance: lente.
-  === FRUITS ET LEGUMES ===
-  - Fraise / Tout: rampante, 3 folioles, fruit rouge. Maladies: oidium poudre blanche, pourriture grise. Arrosage: regulier sans mouiller feuilles. Croissance: rapide, fruits en 2 mois.
-  - Vigne / Dalia: liane, feuilles decoupees. Maladies: mildiou, oidium. Arrosage: moderé. Croissance: rapide.
-  - Tomate / Maticha: feuilles decoupees, fruit rouge. Maladies: mildiou, cul noir. Arrosage: regulier. Croissance: rapide 2-3 mois.
-  - Pomme de terre / Batata: feuilles composees, tubercules. Maladies: mildiou, doryphore. Arrosage: regulier. Croissance: 3-4 mois.
-  - Piment / Felfla: feuilles ovales, fruit piment. Maladies: pucerons, mosaique. Arrosage: regulier. Croissance: 2-3 mois.
-  - Courgette / Graa: grandes feuilles, fruit vert. Maladies: oidium. Arrosage: beaucoup. Croissance: tres rapide.
-  === CEREALES ET CHAMPS ===
-  - Ble / Qamh: tiges hautes, epis. Maladies: rouille, septoriose. Arrosage: pluie. Croissance: 6 mois.
-  - Orge / Chair: comme ble. Maladies: oidium. Arrosage: pluie. Croissance: 5 mois.
-  - Mais / Dra: tiges hautes, epis. Maladies: pyrale. Arrosage: beaucoup. Croissance: 3-4 mois.
-  - Feve / Foul: fleurs blanches/noires, gousses. Maladies: pucerons noirs. Arrosage: moderé. Croissance: 3 mois.
-  - Pois chiche / Hommos: petites feuilles, gousses. Maladies: anthracnose. Arrosage: peu. Croissance: 3 mois.
-  === PLANTES D'INTERIEUR ===
-  - Monstera: GRANDES feuilles TROUEES. Maladies: taches brunes si trop d'eau. Arrosage: peu, laisser secher. Croissance: rapide.
-  - Pothos: liane, feuilles coeur. Maladies: pourriture. Arrosage: peu. Croissance: tres rapide.
-  - Ficus: feuilles ovales brillantes. Maladies: chute feuilles si courant d'air. Arrosage: moderé. Croissance: lente.
-  `;
-
+  const MAROC_DATA: any = {
+    tou: { ar: "توت", fr: "Fraise", sci: "Fragaria x ananassa", formeAr: "نبتة زاحفة، 3 وريقات مسننة، زهرة بيضاء، ثمرة حمراء", formeFr: "Plante rampante, 3 folioles dentées, fleur blanche, fruit rouge", diseaseAr: "البياض: بودرة بيضاء - العفن الرمادي", diseaseFr: "Oidium: poudre blanche - Pourriture grise", wateringAr: "سقي منتظم كل يومين بلا ما تقيس الأوراق", wateringFr: "Arrosage régulier tous les 2 jours sans mouiller feuilles", lightAr: "ضوء قوي", lightFr: "Lumière forte", soilAr: "تربة خفيفة", soilFr: "Sol léger", treatAr: "حيد الأوراق البيضاء و ما تقيسش الأوراق", treatFr: "Enlever feuilles blanches, ne pas mouiller feuilles", croisAr: "تكبر بسرعة، ثمرة في 2 أشهر", croisFr: "Pousse vite, fruit en 2 mois" },
+    hriga: { ar: "حريقة", fr: "Ortie", sci: "Urtica dioica", formeAr: "واقفة 30-120سم، أوراق قلب مسننة + شعيرات كتلسع", formeFr: "Dressée 30-120cm, feuilles coeur dentées + poils qui piquent", diseaseAr: "المن الأسود", diseaseFr: "Pucerons noirs", wateringAr: "سقي معتدل، تربة رطبة", wateringFr: "Arrosage modéré, sol humide", lightAr: "شبه ظل", lightFr: "Mi-ombre", soilAr: "تربة غنية", soilFr: "Sol riche", treatAr: "رش ماء + صابون ضد المن", treatFr: "Pulvériser eau + savon contre pucerons", croisAr: "تكبر بسرعة فالربيع", croisFr: "Pousse vite au printemps" },
+    naanaa: { ar: "نعناع", fr: "Menthe", sci: "Mentha spicata", formeAr: "ساق مربعة، أوراق متقابلة، ريحة قوية", formeFr: "Tige CARREE, feuilles opposées, parfum fort", diseaseAr: "الصدأ برتقالي + البياض", diseaseFr: "Rouille orange + Oidium", wateringAr: "سقي كثير، تربة ديما رطبة", wateringFr: "Beaucoup d'eau, sol toujours humide", lightAr: "ضوء قوي", lightFr: "Lumière forte", soilAr: "تربة رطبة", soilFr: "Sol humide", treatAr: "حيد الأوراق البرتقالية", treatFr: "Enlever feuilles oranges", croisAr: "تكبر بسرعة و كتنتاشر", croisFr: "Pousse très vite" },
+    zitoun: { ar: "زيتون", fr: "Olivier", sci: "Olea europaea", formeAr: "شجرة، أوراق رمحية فوق خضر و تحت رمادي", formeFr: "Arbre, feuilles lancéolées dessus vert dessous gris", diseaseAr: "عين الطاووس بقع سوداء + ذبابة الزيتون", diseaseFr: "Oeil de paon taches noires + mouche olive", wateringAr: "سقي قليل، يقاوم الجفاف", wateringFr: "Peu d'eau, résistant sécheresse", lightAr: "شمس كاملة", lightFr: "Plein soleil", soilAr: "تربة جافة", soilFr: "Sol sec", treatAr: "حيد الأوراق السوداء و رش بالنحاس", treatFr: "Enlever feuilles noires et traiter au cuivre", croisAr: "تكبر بشوية، تعيش 100 عام", croisFr: "Pousse lentement, vit 100 ans" },
+    azir: { ar: "أزير", fr: "Romarin", sci: "Rosmarinus", formeAr: "شجيرة، أوراق إبر، ريحة قوية", formeFr: "Arbuste, feuilles aiguilles, parfum fort", diseaseAr: "تعفن الجذور إلا سقيتي بزاف", diseaseFr: "Pourriture racines si trop d'eau", wateringAr: "سقي قليل بزاف", wateringFr: "Très peu d'eau", lightAr: "شمس", lightFr: "Soleil", soilAr: "تربة جافة", soilFr: "Sol sec", treatAr: "نقص السقي", treatFr: "Réduire arrosage", croisAr: "تكبر بشوية", croisFr: "Pousse lentement" },
+    zaatar: { ar: "زعتر", fr: "Thym", sci: "Thymus", formeAr: "شجيرة صغيرة، أوراق صغار رمادية، ريحة قوية", formeFr: "Petit arbuste, petites feuilles grises, parfum fort", diseaseAr: "تعفن إلا سقيتي بزاف", diseaseFr: "Pourriture si trop d'eau", wateringAr: "سقي قليل", wateringFr: "Peu d'eau", lightAr: "شمس", lightFr: "Soleil", soilAr: "تربة جافة", soilFr: "Sol sec", treatAr: "نقص السقي", treatFr: "Réduire arrosage", croisAr: "تكبر بشوية", croisFr: "Pousse lentement" },
+    limoun: { ar: "ليمون", fr: "Citronnier", sci: "Citrus limon", formeAr: "شجرة، أوراق بيضاوية لامعة، ثمرة صفراء", formeFr: "Arbre, feuilles ovales brillantes, fruit jaune", diseaseAr: "حافرة الأوراق خطوط بيضاء + قشريات", diseaseFr: "Mineuse lignes blanches + cochenilles", wateringAr: "سقي منتظم 2 مرات فالسيمانا", wateringFr: "Arrosage régulier 2x semaine", lightAr: "شمس", lightFr: "Soleil", soilAr: "تربة خفيفة", soilFr: "Sol léger", treatAr: "حيد الأوراق المخططة", treatFr: "Enlever feuilles lignées", croisAr: "تكبر بمتوسط", croisFr: "Pousse moyenne" },
+    karmous: { ar: "كرموس", fr: "Figuier", sci: "Ficus carica", formeAr: "شجرة، أوراق كبيرة 5 أقسام", formeFr: "Arbre, grandes feuilles 5 lobes", diseaseAr: "الصدأ بقع برتقالية", diseaseFr: "Rouille taches oranges", wateringAr: "سقي قليل", wateringFr: "Peu d'eau", lightAr: "شمس", lightFr: "Soleil", soilAr: "تربة عادية", soilFr: "Sol normal", treatAr: "حيد الأوراق المصابة", treatFr: "Enlever feuilles atteintes", croisAr: "تكبر بسرعة", croisFr: "Pousse vite" },
+    ward: { ar: "ورد", fr: "Rosier", sci: "Rosa", formeAr: "شجيرة فيها شوك، زهرة معطرة", formeFr: "Arbuste avec épines, fleur parfumée", diseaseAr: "البياض بودرة بيضاء + بقع سوداء", diseaseFr: "Oidium poudre blanche + taches noires", wateringAr: "سقي منتظم بلا ما تقيس الأوراق", wateringFr: "Arrosage régulier sans mouiller feuilles", lightAr: "شمس", lightFr: "Soleil", soilAr: "تربة غنية", soilFr: "Sol riche", treatAr: "حيد الأوراق البيضاء", treatFr: "Enlever feuilles blanches", croisAr: "تكبر بمتوسط", croisFr: "Pousse moyenne" },
+    sabbar: { ar: "صبار", fr: "Aloe Vera", sci: "Aloe vera", formeAr: "أوراق لحمية فيها جيل و شوك فالجوانب", formeFr: "Feuilles charnues avec gel et épines sur bords", diseaseAr: "تعفن إلا سقيتي بزاف", diseaseFr: "Pourriture si trop d'eau", wateringAr: "سقي قليل بزاف مرة فالشهر", wateringFr: "Très peu d'eau 1x par mois", lightAr: "ضوء قوي", lightFr: "Lumière forte", soilAr: "تربة رملية", soilFr: "Sol sableux", treatAr: "حبسي السقي", treatFr: "Arrêter arrosage", croisAr: "تكبر بشوية", croisFr: "Pousse lentement" },
+  };
+  const MAROC = "PLANTES DU MAROC: Fraise, Ortie, Menthe, Olivier, Romarin, Thym, Citron, Figuier, Rosier, Aloe, Oranger, Grenadier, Palmier, Argan, Cedre, Vigne, Tomate, Pomme de terre, Ble, Orge, Mais, Feve, Jasmin, Geranium, Lavande, Sauge, Verveine, Armoise, Mauve, Chardon, Pissenlit, Pourpier, Basilic, Persil, Coriandre, Piment, Courgette, Eucalyptus, Laurier, Bougainvillier, Monstera, Pothos, Ficus, Cactus Hindi. Chaque plante avec sa forme, sa maladie, son arrosage, sa croissance.";
   const analyseAI = async (image: string) => {
     const key = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
     if (!key) { setErrMsg(lang === "ar" ? "المفتاح ما كاينش في Vercel" : "Clé manquante dans Vercel"); return null; }
     const base64 = image.split(",")[1];
-    const prompt = lang === "ar"
-      ? `أنت عالم نباتات خبير يعرف جميع أنواع النباتات في العالم، وخاصة نباتات المغرب. هذا هو علمك عن المغرب: ${MAROC} أنت تعرف جميع أنواع النباتات في العالم: أشجار، زينة، طبية وعطرية، صبار، فواكه، حبوب، داخلية وخارجية، وكل أنواع النباتات. وتعرف جميع أمراض النباتات. القاعدة: ممنوع تخمن الاسم. إذا عرفت النبتة بـ 100% قل اسمها. إذا لم تكن متأكدا، لا تكتب أي اسم غالط، اكتب "نبتة غير محددة" واترك العلمي فارغا. المهم: حتى إذا لم تعرف الاسم، حلل المرض والسقي والعلاج بصحيح 100% من ما تراه فعلا: لون الأوراق، بقع، اصفرار، ذبول، جفاف، حشرات. لا تقل مونستيرا إلا إذا رأيت أوراقا مثقوبة كبيرة. لا تقل أفوكا إلا إذا رأيت شجرة بأوراق كبيرة ملساء. لا تقل نعناع إلا إذا رأيت ساقا مربعة وأوراقا متقابلة. لا تقل توت إلا إذا رأيت نبتة زاحفة بثلاث وريقات وثمرة حمراء. لا تقل حريقة إلا إذا رأيت شعيرات لاسعة. أعد فقط JSON: {"name":"الاسم الحقيقي بالعربية أو نبتة غير محددة","scientific":"الاسم العلمي أو فارغ","health": رقم 0-100,"disease":"المرض الظاهر فعلا بالعربية","watering":"السقي بالعربية","light":"الضوء بالعربية","soil":"التربة بالعربية","treatment":"العلاج بالعربية"}`
-      : `Tu es un botaniste expert qui connait TOUS les types de plantes du monde, et surtout les plantes du MAROC. Voici ta connaissance du Maroc: ${MAROC} Tu connais TOUS les types de plantes du monde: arbres, ornement, medicinales, cactus, fruits, cereales, interieur et exterieur. Et tu connais TOUTES les maladies. Regle d'or: INTERDIT de deviner le nom. Si tu connais a 100%, dis son vrai nom. Si tu n'es pas sur, n'ecris AUCUN faux nom, ecris "Plante non identifiée" et laisse scientifique vide. Tres important: meme si tu ne connais pas le nom, analyse maladie, arrosage et traitement a 100% d'apres ce que tu vois VRAIMENT: couleur feuilles, taches, jaunissement, fletrissement, insectes. Ne dis JAMAIS Monstera sauf si grandes feuilles trouees. Ne dis JAMAIS Avocat sauf si arbre a grandes feuilles lisses. Ne dis JAMAIS Menthe sauf si tige carree et feuilles opposees. Ne dis JAMAIS Fraise sauf si rampante a 3 folioles et fruit rouge. Ne dis JAMAIS Ortie sauf si poils urticants. Retourne UNIQUEMENT ce JSON: {"name":"vrai nom en français ou Plante non identifiée","scientific":"vrai nom scientifique ou vide","health": nombre 0-100,"disease":"maladie visible vraiment en français","watering":"arrosage en français","light":"lumière en français","soil":"sol en français","treatment":"traitement en français"}`;
-    for (const model of ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]) {
+    const promptMaroc = lang === "ar" ? "قائمة المغرب: tou توت, hriga حريقة, naanaa نعناع, zitoun زيتون, azir أزير, zaatar زعتر, limoun ليمون, karmous كرموس, ward ورد, sabbar صبار. انظر للصورة: إذا كانت تشبه واحدة 100% قل كودها فقط. وإلا قل pas_maroc. كلمة واحدة فقط." : "Liste Maroc: tou Fraise, hriga Ortie, naanaa Menthe, zitoun Olivier, azir Romarin, zaatar Thym, limoun Citron, karmous Figuier, ward Rosier, sabbar Aloe. Regarde photo: si elle ressemble à 100% à une, dis son code seulement. Sinon dis pas_maroc. UN SEUL MOT.";
+    try {
+      const j1 = await callAI("gemini-3.5-flash-lite", base64, promptMaroc, key);
+      let code1 = (j1.candidates?.[0]?.content?.parts?.[0]?.text || "").toLowerCase().trim();
+      for (const k of ["tou","hriga","naanaa","zitoun","azir","zaatar","limoun","karmous","ward","sabbar"]) { if (code1.includes(k)) { code1 = k; break; } }
+      if (MAROC_DATA[code1]) {
+        const d = MAROC_DATA[code1];
+        const isAr = lang === "ar";
+        setErrMsg("");
+        return { name: isAr ? d.ar : d.fr, scientific: d.sci, health: 80, disease: (isAr ? d.formeAr + " | المرض: " + d.diseaseAr : d.formeFr + " | Maladie: " + d.diseaseFr), watering: isAr ? d.wateringAr + " | النمو: " + d.croisAr : d.wateringFr + " | Croissance: " + d.croisFr, light: isAr ? d.lightAr : d.lightFr, soil: isAr ? d.soilAr : d.soilFr, treatment: isAr ? d.treatAr : d.treatFr };
+      }
+    } catch {}
+    const prompt = lang === "ar" ? `أنت عالم نباتات خبير يعرف جميع نباتات المغرب والعالم. علمك عن المغرب: ${MAROC} ممنوع تخمن الاسم. إذا عرفت 100% قل اسمها. إذا لم تكن متأكدا قل "نبتة غير محددة" واترك العلمي فارغا. حتى إذا لم تعرف الاسم، حلل المرض والسقي والعلاج بصحيح من ما تراه فعلا. أعد فقط JSON: {"name":"الاسم الحقيقي بالعربية أو نبتة غير محددة","scientific":"الاسم العلمي أو فارغ","health": رقم 0-100,"disease":"المرض الظاهر فعلا","watering":"السقي","light":"الضوء","soil":"التربة","treatment":"العلاج"}` : `Tu es botaniste expert qui connait toutes les plantes du Maroc et du monde. Connaissance Maroc: ${MAROC} INTERDIT de deviner. Si tu connais à 100% dis son nom. Sinon dis "Plante non identifiée" et laisse scientifique vide. Meme si tu ne connais pas le nom, analyse maladie, arrosage, traitement d'après ce que tu vois VRAIMENT. Retourne UNIQUEMENT JSON: {"name":"vrai nom ou Plante non identifiée","scientific":"nom scientifique ou vide","health": nombre 0-100,"disease":"maladie visible","watering":"arrosage","light":"lumière","soil":"sol","treatment":"traitement"}`;
+    let lastErr = "";
+    for (const model of ["gemini-3.5-flash-lite", "gemini-3-flash", "gemini-3.8-flash"]) {
       try {
         const j = await callAI(model, base64, prompt, key);
-        if (j.error) { continue; }
+        if (j.error) { lastErr = j.error.message || ""; continue; }
         let txt = j.candidates?.[0]?.content?.parts?.[0]?.text || "";
         if (!txt) continue;
         const start = txt.indexOf("{");
@@ -156,12 +122,11 @@ export default function Home() {
         if (parsed.health > 100) parsed.health = 100;
         setErrMsg("");
         return parsed;
-      } catch (e: any) { continue; }
+      } catch (e: any) { lastErr = e.message || "timeout"; continue; }
     }
-    setErrMsg(lang === "ar" ? "عاود حاول من بعد شوية" : "Réessaie dans quelques secondes");
+    setErrMsg((lang === "ar" ? "ما خدمش: " : "Ca n a pas marché: ") + lastErr);
     return null;
   };
-
   const analyse = async () => {
     if (!img) return;
     setLoad(true); setRes(null); setErrMsg(""); setConfetti(false);
@@ -175,7 +140,7 @@ export default function Home() {
     }
     setLoad(false);
   };
-
+  const removePlant = (idx: number) => { setMyPlants((prev) => prev.filter((_, i) => i !== idx)); };
   const FALLING = ["🍃","🍂","🌿","🍁","🌱","🍃","🍂","🌿","🍁","🍃","🌱","🍂"];
 
   return (
@@ -259,7 +224,10 @@ export default function Home() {
           <div key={i} style={{ background: "#fff", padding: 12, borderRadius: 18, marginBottom: 10, display: "flex", gap: 12, alignItems: "center", boxShadow: "0 4px 18px rgba(0,0,0,0.06)", border: "1px solid #BBF7D0" }}>
             <img src={p.img} alt={p.name} style={{ width: 85, height: 85, borderRadius: 14, objectFit: "cover", flexShrink: 0 }} />
             <div style={{ flex: 1 }}>
-              <b style={{ fontSize: 15, color: "#0F3D2E" }}>{p.name}</b>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
+                <b style={{ fontSize: 15, color: "#0F3D2E", flex: 1 }}>{p.name}</b>
+                <button onClick={() => removePlant(i)} title={lang === "ar" ? "حيدها من حديقتي" : "Retirer du jardin"} style={{ background: "#FEE2E2", border: "none", borderRadius: 8, width: 30, height: 30, fontSize: 14, cursor: "pointer", flexShrink: 0 }}>🗑️</button>
+              </div>
               <div style={{ marginTop: 6 }}><span style={{ background: p.status === "Alerte" ? "#FEE2E2" : "#FEF3C7", color: p.status === "Alerte" ? "#991B1B" : "#92400E", padding: "4px 10px", borderRadius: 20, fontSize: 12, fontWeight: "bold" }}>{lang === "ar" ? p.statusAr : p.status}</span></div>
               <p style={{ margin: "6px 0 4px 0", fontSize: 13, color: "#1D4ED8", fontWeight: "bold" }}>💧 {lang === "ar" ? p.waterAr : p.water}</p>
               <p style={{ margin: "2px 0", fontSize: 12, color: "#666" }}>🌱 {lang === "ar" ? p.growthLabel : p.growthLabelFr} - {p.growth}%</p>
